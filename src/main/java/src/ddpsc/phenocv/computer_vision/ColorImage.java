@@ -1,25 +1,24 @@
 package src.ddpsc.phenocv.computer_vision;
 
-import org.opencv.core.*;
+import org.opencv.core.Core;
+import org.opencv.core.CvType;
+import org.opencv.core.Mat;
 import org.opencv.highgui.Highgui;
 import org.opencv.imgproc.Imgproc;
-import org.opencv.video.BackgroundSubtractor;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * @author cjmcentee
  */
-public final class ColorImage extends Image {
+public class ColorImage extends Image {
 
-    public static final int CHANNEL_SIZE = 256;
-    public static final float CHANNEL_MIN = 0;
-    public static final float CHANNEL_MAX = 255;
+    private HSVFactory hsvImage;
+    private LabFactory labImage;
+    private YCrCbFactory ycrcbImage;
 
-
-    private HSV hsvImage;
-    private Lab labImage;
-    private YCrCb ycrcbImage;
 
     /// ======================================================================
     /// Constructors
@@ -68,80 +67,44 @@ public final class ColorImage extends Image {
     }
 
     private void _init() {
-        hsvImage = new HSV();
-        labImage = new Lab();
-        ycrcbImage = new YCrCb();
+        hsvImage = new HSVFactory();
+        labImage = new LabFactory();
+        ycrcbImage = new YCrCbFactory();
     }
 
 
     /// ======================================================================
     /// Image Manipulation
     /// ======================================================================
+    @Override
+    public void setPixels(byte[] pixels, int width) {
+        int numberPixels = pixels.length / 3;
+        int columns = width;
+        int rows = numberPixels / columns;
 
-    public void grabCut(GrayImage mask) {
-        Mat background = new Mat();
-        Mat foreground = new Mat();
-        Imgproc.grabCut(image, mask.image, rectangle(), background, foreground, 4, Imgproc.GC_INIT_WITH_MASK);
+        image.release();
+
+        image = new Mat(rows, columns, CvType.CV_8UC3);
+        image.put(0, 0, pixels);
     }
 
-    public void trainBackgroundSubtract(BackgroundSubtractor subtractor) {
-        subtractor.apply(image, new Mat(), 10);
-    }
+    //    public void grabCut(GrayImage mask) {
+//        Mat background = new Mat();
+//        Mat foreground = new Mat();
+//        Imgproc.grabCut(image, mask.image, rectangle(), background, foreground, 4, Imgproc.GC_INIT_WITH_MASK);
+//    }
 
-    public GrayImage getForegroundMask(BackgroundSubtractor subtractor) {
-        Mat foregroundMask = new Mat();
-        subtractor.apply(image, foregroundMask, 0);
-        return new GrayImage(foregroundMask);
-    }
-
-    public ColorImage segment(GrayImage contourMask) {
-
-        Mat markers = new Mat();
-        contourMask.image.convertTo(markers, CvType.CV_32S);
-
-        Imgproc.watershed(image, markers);
-
-        Highgui.imwrite("segmentation markers.png", markers);
-        return this;
-    }
-
-    public void subtractBackground(ColorImage background) {
-        ColorImage difference = background.minus(this);
-        GrayImage differenceGray = difference.toGrayscale();
-        Mask foregroundMask = differenceGray.toMask(20);
-        this.maskWith(foregroundMask);
-    }
-
-    public ColorImage minus(ColorImage subtrahend) {
-        ColorImage difference = new ColorImage(width(), height());
-
-        int minuendPixels[] = toInt(this.pixels());
-        int subtrahendPixels[] = toInt(subtrahend.pixels());
-        byte differencePixels[] = difference.pixels();
-
-        for (int p = 0; p < minuendPixels.length; p++)
-            differencePixels[p] = (byte)(Math.max(0, (int) minuendPixels[p] - (int) subtrahendPixels[p]));
-
-        difference.setPixels(differencePixels);
-        return difference;
-    }
-
-    private static int[] toInt(byte bytes[]) {
-        int ints[] = new int[bytes.length];
-        for (int i = 0; i < bytes.length; i++)
-            ints[i] = bytes[i] & 0xff;
-        return ints;
-    }
 
     /// ======================================================================
     /// Conversion and Copying
     /// ======================================================================
-
     @Override
     public Image copy() {
-        Mat copy = new Mat();
-        image.copyTo(copy);
-        return new ColorImage(copy);
+        Mat copiedMatrix = new Mat();
+        image.copyTo(copiedMatrix);
+
+        ColorImage colorCopy = new ColorImage(copiedMatrix);
+        return colorCopy;
     }
 
     /**
@@ -163,45 +126,98 @@ public final class ColorImage extends Image {
      */
     public GrayImage getChannel(Channel channel) {
 
-        Mat convertedImage = getWholeMatOf(channel);
+        // Get each channel
         List<Mat> channels = new ArrayList<Mat>();
+        Mat convertedImage = getWholeMatOf(channel); // reference to field variable, do not release
         Core.split(convertedImage, channels);
 
+        // Return only the relevant channel
         switch (channel) {
-            case HUE:
-            case BLUE:
-            case LIGHTNESS:
-            case Y:
-                return new GrayImage(channels.get(0));
+            case VALUE:
+            case RED:
+            case B:
+            case Cb:
+                channels.get(0).release();
+                channels.get(1).release();
+                return new GrayImage(channels.get(2));
 
             case SATURATION:
             case GREEN:
             case A:
             case Cr:
+                channels.get(0).release();
+                channels.get(2).release();
                 return new GrayImage(channels.get(1));
 
-            case VALUE:
-            case RED:
-            case B:
-            case Cb:
-                return new GrayImage(channels.get(2));
-
+            case HUE:
+            case BLUE:
+            case LIGHTNESS:
+            case Y:
             default:
+                channels.get(1).release();
+                channels.get(2).release();
                 return new GrayImage(channels.get(0));
         }
     }
 
-    public ColorImage asHSV() {
-        return new ColorImage(hsvImage.from(image));
+
+    /// ======================================================================
+    /// Releasable
+    /// ======================================================================
+    @Override
+    public void release() {
+        super.release();
+        hsvImage.release();
+        labImage.release();
+        ycrcbImage.release();
     }
 
-    public ColorImage asLab() {
-        return new ColorImage(labImage.from(image));
+
+    /// ======================================================================
+    /// Lower level OpenCV Java bindings access
+    /// ======================================================================
+    public Mat cvAsBGRMatrix() {
+        Mat bgr = new Mat();
+        image.copyTo(bgr);
+        return bgr;
     }
 
-    public ColorImage asYCrCb() {
-        return new ColorImage(ycrcbImage.from(image));
+    /**
+     * Access to the OpenCV Java binding root object.
+     *
+     * For use in adding functionality to this library without
+     * forking or modifying its source code.
+     *
+     * @return      {@link Mat} representing the image in HSV format
+     */
+    public Mat cvAsHSVMatrix() {
+        return hsvImage.getFrom(image);
     }
+
+    /**
+     * Access to the OpenCV Java binding root object.
+     *
+     * For use in adding functionality to this library without
+     * forking or modifying its source code.
+     *
+     * @return      {@link Mat} representing the image in Lab format
+     */
+    public Mat cvAsLabMatrix() {
+        return labImage.getFrom(image);
+    }
+
+    /**
+     * Access to the OpenCV Java binding root object.
+     *
+     * For use in adding functionality to this library without
+     * forking or modifying its source code.
+     *
+     * @return      {@link Mat} representing the image in YCrCb format
+     */
+    public Mat cvAsYCrCbMatrix() {
+        return ycrcbImage.getFrom(image);
+    }
+
 
     /// ======================================================================
     /// Helper Methods
@@ -220,6 +236,11 @@ public final class ColorImage extends Image {
 
         Mat newImage = new Mat();
         Core.merge(channels, newImage);
+
+        channel1Image.release();
+        channel2Image.release();
+        channel3Image.release();
+
         return newImage;
     }
 
@@ -231,16 +252,16 @@ public final class ColorImage extends Image {
 
         Mat newImage = new Mat();
         Core.merge(channels, newImage);
+
+        channel1Image.release();
+        channel2Image.release();
+
         return newImage;
     }
 
     protected Mat makeMatOf(Channel channel) {
         GrayImage channelImage = getChannel(channel);
-        List<Mat> channels = Arrays.asList(channelImage.image);
-
-        Mat newImage = new Mat();
-        Core.merge(channels, newImage);
-        return newImage;
+        return channelImage.image;
     }
 
     protected Mat getWholeMatOf(Channel channel) {
@@ -248,19 +269,18 @@ public final class ColorImage extends Image {
             case HUE:
             case SATURATION:
             case VALUE:
-                return hsvImage.from(image);
-            case BLUE:
-            case GREEN:
-            case RED:
-                return image;
+                return cvAsHSVMatrix();
             case LIGHTNESS:
             case A:
             case B:
-                return labImage.from(image);
+                return cvAsLabMatrix();
             case Y:
             case Cr:
             case Cb:
-                return ycrcbImage.from(image);
+                return cvAsYCrCbMatrix();
+            case BLUE:
+            case GREEN:
+            case RED:
             default:
                 return image;
         }

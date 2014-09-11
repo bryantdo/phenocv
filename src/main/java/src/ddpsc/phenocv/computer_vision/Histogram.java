@@ -4,11 +4,15 @@ import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.highgui.Highgui;
 import org.opencv.imgproc.Imgproc;
+import src.ddpsc.phenocv.utility.Copy;
+import src.ddpsc.phenocv.utility.Lists;
+
+import java.util.List;
 
 /**
  * @author cjmcentee
  */
-public final class Histogram implements Writable {
+public final class Histogram implements Writable, Releasable {
 
     public static final double NO_SCALING = 1;
 
@@ -40,7 +44,7 @@ public final class Histogram implements Writable {
         histogram = histogramMat;
     }
 
-    public static Histogram Blank(HistogramChannels channels) {
+    public static Histogram blank(HistogramChannels channels) {
         Histogram histogram = new Histogram();
         histogram.channels = channels;
         histogram.histogram = null;
@@ -51,7 +55,7 @@ public final class Histogram implements Writable {
     public Histogram copy() {
         Histogram copy = new Histogram();
         copy.channels = channels;
-        copy.histogram = histogram;
+        copy.histogram = Copy.matrix(histogram);
 
         return copy;
     }
@@ -78,13 +82,16 @@ public final class Histogram implements Writable {
 
          Mat backProjectedImage = new Mat();
 
+        List<Mat> imageMatrix = channels.convertedImage(image);
         Imgproc.calcBackProject(
-                channels.convertedImage(image),
+                imageMatrix,
                 channels.channelIndices(),
                 histogram,
                 backProjectedImage,
                 channels.channelRanges(),
                 NO_SCALING);
+
+        ReleaseContainer.releaseMatrices(imageMatrix);
 
         return new GrayImage(backProjectedImage);
     }
@@ -92,42 +99,57 @@ public final class Histogram implements Writable {
     public static Histogram fromImage(HistogramChannels channels, ColorImage image, Mask mask) {
 
         Mat histogram = new Mat();
+        List<Mat> convertedMatrix = channels.convertedImage(image);
         Imgproc.calcHist(
-                channels.convertedImage(image),
+                convertedMatrix,
                 channels.channelIndices(),
                 mask.image,
                 histogram,
                 channels.channelSizes(),
                 channels.channelRanges());
 
+        ReleaseContainer.releaseMatrices(convertedMatrix);
+
         return new Histogram(channels, histogram);
     }
 
     public static Histogram fromImage(HistogramChannels channels, ColorImage image) {
-        return fromImage(channels, image, Mask.showsAll());
+        return fromImage(channels, image, Mask.showsAll(image.size()));
     }
 
     /**
      * Adds the values of the supplied histogram to this histogram.
      *
-     * @param histogram
+     * @param mergingHistogram      histogram being merged into this one
      */
-    public Histogram combineWith(Histogram histogram) {
+    public void combineWith(Histogram mergingHistogram) {
 
-        if (this.histogram == null)
-            return histogram.copy();
+        if (mergingHistogram == null || mergingHistogram.histogram == null)
+            return;
 
-        if (histogram.histogram == null)
-            return this.copy();
+        if (this.histogram == null) { // not same as this being null, this.histogram is Matrix field
+            this.channels = mergingHistogram.channels;
+            this.histogram = Copy.matrix(mergingHistogram.histogram);
 
-        Mat combined = new Mat();
-        Core.add(this.histogram, histogram.histogram, combined);
+            return;
+        }
 
-        Histogram combinedHistogram = new Histogram();
-        combinedHistogram.channels = this.channels;
-        combinedHistogram.histogram = combined;
+        if (channels.equals(mergingHistogram.channels)) {
+//            Mat combinedHistogram = new Mat();
 
-        return combinedHistogram;
+            Core.add(this.histogram, mergingHistogram.histogram, this.histogram);
+//
+//            Mat oldHistogram = this.histogram;
+//            this.histogram = combinedHistogram;
+//            oldHistogram.release();
+        }
+    }
+
+    /// ======================================================================
+    /// Releasable
+    /// ======================================================================
+    public void release() {
+        histogram.release();
     }
 
     /// ======================================================================

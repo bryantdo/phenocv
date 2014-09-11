@@ -1,11 +1,9 @@
 package src.ddpsc.phenocv.computer_vision;
 
-import org.opencv.core.Core;
-import org.opencv.core.Mat;
-import org.opencv.imgproc.Imgproc;
-
 import org.opencv.core.CvType;
+import org.opencv.core.Mat;
 import org.opencv.highgui.Highgui;
+import org.opencv.imgproc.Imgproc;
 
 /**
  * @author cjmcentee
@@ -58,12 +56,18 @@ public class GrayImage extends Image {
     /// ======================================================================
     /// Image Manipulation
     /// ======================================================================
-
+    @Override
+    public void setPixels(byte[] pixels, int width) {
+        int numberPixels = pixels.length / 1;
+        int columns = width;
+        int rows = numberPixels / columns;
+        image = new Mat(rows, columns, CvType.CV_8UC1);
+        image.put(0, 0, pixels);
+    }
 
     /// ======================================================================
     /// Conversion and Copying
     /// ======================================================================
-
     @Override
     public Image copy() {
         Mat copy = new Mat();
@@ -72,10 +76,10 @@ public class GrayImage extends Image {
     }
 
     /**
-     * Returns a mask of this image. Any pixels below the threshold value
+     * Returns a {@link Mask} of this image. Any pixels below the threshold value
      * are treated as block (black), and above as show (white).
      *
-     * @param threshold     threshold below which all pixels are blocked
+     * @param threshold     value below which pixels are blocked in the mask
      * @return              mask
      */
     public Mask toMask(int threshold) {
@@ -85,13 +89,49 @@ public class GrayImage extends Image {
     }
 
     /**
-     * Returns a mask of this image. Any non-black pixels are treated
+     * Returns a {@link Mask} of this image where blocked pixels are those
+     * that are relatively lower to their neighbors by approximately
+     * relativeDifference in value.
+     *
+     * @param relativeDifference    approx difference between a pixel and its neighbors to be masked
+     * @return                      mask
+     */
+    public Mask toMaskRelative(int relativeDifference) {
+        Mat mask = new Mat();
+        Imgproc.adaptiveThreshold(image, mask, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 10, relativeDifference);
+        return new Mask(mask);
+    }
+
+    /**
+     * Returns a {@link Mask} of this image where an automatic algorithm
+     * attempts to determine which pixels are background and which are foreground.
+     * In the resulting mask, background pixels are blocked, foreground pixels are shown.
+     *
+     * Uses Otsu's method of histogram analysis.
+     *
+     * @return      mask
+     */
+    public Mask toMaskAutomatic() {
+        Mat mask = new Mat();
+        Imgproc.threshold(image, mask, 1, 255, Imgproc.THRESH_BINARY | Imgproc.THRESH_OTSU);
+        return new Mask(mask);
+    }
+
+    /**
+     * Returns a {@link Mask} of this image. Any non-black pixels are treated
      * as show (white), and black pixels as block (black).
      *
-     * @return              mask
+     * @return              mask of this image
      */
     public Mask toMask() {
         return toMask(1);
+    }
+
+    /// ======================================================================
+    /// Lower level OpenCV Java bindings access
+    /// ======================================================================
+    public Mat cvAsGray() {
+        return image;
     }
 
     /// ======================================================================

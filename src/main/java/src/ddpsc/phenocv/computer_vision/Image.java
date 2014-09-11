@@ -1,25 +1,17 @@
 package src.ddpsc.phenocv.computer_vision;
 
-import org.opencv.core.MatOfPoint;
-import org.opencv.core.Scalar;
-import org.opencv.core.Rect;
+import org.opencv.core.*;
+import org.opencv.highgui.Highgui;
 import org.opencv.imgproc.Imgproc;
 import src.ddpsc.phenocv.debug.Readable;
 
-import org.opencv.core.Mat;
-import org.opencv.highgui.Highgui;
-import org.opencv.core.Size;
-import src.ddpsc.phenocv.utility.Tuple;
-
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Random;
 
 /**
  * @author cjmcentee
  */
-public abstract class Image implements Writable {
+public abstract class Image implements Writable, Releasable {
 
     protected Mat image;
 
@@ -42,91 +34,119 @@ public abstract class Image implements Writable {
         image = Highgui.imread(filename, imageType);
     }
 
+
     /// ======================================================================
     /// Writable
     /// ======================================================================
     @Override
     public void writeTo(String filename) {
-        Highgui.imwrite(filename, image);
-    }
+        if (image.channels() == 2) {
+            Mat flatRed = new Mat(image.size(), CvType.CV_8UC1);
 
-    public static void writeTo(List<Tuple<Image, String>> imageWrites) {
-        for (Tuple<Image, String> imageWrite : imageWrites) {
-            Image image = imageWrite.item1;
-            String filename = imageWrite.item2;
+            List<Mat> blueGreenChannels = new ArrayList<Mat>(2);
+            Core.split(image, blueGreenChannels);
+            blueGreenChannels.add(flatRed);
 
-            image.writeTo(filename);
+            Mat threeChannelMatrix = new Mat();
+            Core.merge(blueGreenChannels, threeChannelMatrix);
+
+            Highgui.imwrite(filename, threeChannelMatrix);
+
+            flatRed.release();
+            ReleaseContainer.releaseMatrices(blueGreenChannels);
+            threeChannelMatrix.release();
         }
+        else
+            Highgui.imwrite(filename, image);
     }
+
+
+    /// ======================================================================
+    /// Writable
+    /// ======================================================================
+    @Override
+    public void release() {
+        image.release();
+    }
+
 
     /// ======================================================================
     /// Image Manipulation
     /// ======================================================================
-
     /**
      * Pixels set to black where they overlap with blocked (black) pixels in the mask
      *
+     * @param mask mask to block pixels with
      * @see Mask
-     *
-     * @param mask          mask to block pixels with
      */
     public void maskWith(Mask mask) {
-        image.copyTo(image, mask.image);
+        Mat maskedMatrix = new Mat();
+        image.copyTo(maskedMatrix, mask.image);
+
+        Mat oldImage = image;
+        image = maskedMatrix;
+        oldImage.release();
+    }
+
+    /**
+     * Pixels set to black where they don't overlap with the supplied {@link Shape}.
+     * <p/>
+     * Holes in the shape are considered not to overlap. Only the filled in portion
+     * of the shape is overlapping.
+     *
+     * @param shape shape to mask with
+     */
+    public void maskWith(Shape shape) {
+        Mask shapeMask = shape.imageMask(size());
+        maskWith(shapeMask);
+
+        shapeMask.release();
+    }
+
+    /**
+     * Pixels set to black where they don't overlap with the supplied {@link ShapeCollection}.
+     * <p/>
+     * Holes in the collection are considered not to overlap. Only filled in shapes are
+     * overlapping.
+     *
+     * @param shapes shapes to mask with
+     */
+    public void maskWith(ShapeCollection shapes) {
+        GrayImage grayShapes = shapes.grayImage(size());
+        Mask shapesMask = grayShapes.toMask(1);
+        maskWith(shapesMask);
+
+        grayShapes.release();
+        shapesMask.release();
     }
 
     /**
      * Applies a median filter to the image.
-     *
+     * <p/>
      * Generally median filters sharpen and smooth the image while removing
      * small dots of noise.
-     *
+     * <p/>
      * The median filter behaves by setting each pixel to the median value of
      * any of its neighboring pixels within the specified radius.
-     *
+     * <p/>
      * The strength of the filter is the same as that radius. Usual values
      * are in the range of 2-20.
      *
-     * @param strength        strength of filter
+     * @param strength strength of filter
      */
     public void medianFilter(int strength) {
         Imgproc.medianBlur(image, image, strength);
     }
 
-    /**
-     * Finds and returns the contours of the image. Works best on {@link Mask} images
-     * and high contrast {@link GrayImage}.
-     *
-     * @return              contours of the image
-     */
-    public List<MatOfPoint> findContours() {
-        List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
-        Mat heirarchy = new Mat();
-        Imgproc.findContours(image, contours, heirarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_NONE);
+    public GrayImage segment(GrayImage segmentGuessImage) {
+        Mat markers = new Mat();
+        segmentGuessImage.image.convertTo(markers, CvType.CV_32S);
 
-        return contours;
+        Imgproc.watershed(image, markers);
+
+        return new GrayImage(markers);
     }
 
-    /**
-     * Draws the contours on the image as lines of random colors 4 pixels thick.
-     *
-     * If the image is a {@link GrayImage}, draws the contours as random shades of
-     * gray.
-     *
-     * @param contours      contours to draw
-     */
-    public void drawContours(List<MatOfPoint> contours) {
-
-        Random random = new Random();
-        for (MatOfPoint contour : contours) {
-            List<MatOfPoint> singleContour = Arrays.asList(contour);
-            Scalar randomColor = new Scalar(
-                    127 + random.nextInt(128),
-                    127 + random.nextInt(128),
-                    127 + random.nextInt(128));
-
-            Imgproc.drawContours(image, singleContour, -1, randomColor, 4);
-        }
-    }
 
     /// ======================================================================
     /// Conversion and Copying
@@ -135,27 +155,24 @@ public abstract class Image implements Writable {
     /**
      * Deep copy of the image
      *
-     * @return      copy of the image
+     * @return copy of the image
      */
     public abstract Image copy();
-
 
 
     /// ======================================================================
     /// Properties
     /// ======================================================================
-    protected byte[] pixels() {
+    public byte[] pixels() {
         byte pixels[] = new byte[numberPixels() * image.channels()];
         image.get(0, 0, pixels);
         return pixels;
     }
 
-    protected void setPixels(byte[] pixels) {
-        image.put(0, 0, pixels);
-    }
+    public abstract void setPixels(byte[] pixels, int width);
 
     public int numberPixels() {
-        return (int)image.total();
+        return (int) image.total();
     }
 
     public int width() {
@@ -166,16 +183,23 @@ public abstract class Image implements Writable {
         return image.height();
     }
 
-    protected Rect rectangle() {
-        return new Rect(0, 0, width(), height());
+    public Rect rectangle() {
+        return new Rect(new Point(), image.size());
     }
 
+    public Size size() {
+        return image.size();
+    }
+
+    public int valueType() {
+        return image.type();
+    }
 
     /// ======================================================================
     /// Helper Methods
     /// ======================================================================
     String debugString() {
-        String debug =  "Image Dimensions: " + width() + ", " + height()
+        String debug = "Image Dimensions: " + width() + ", " + height()
                 + "\nImage Pixel Type: " + Readable.type(image.type());
 
         return debug;

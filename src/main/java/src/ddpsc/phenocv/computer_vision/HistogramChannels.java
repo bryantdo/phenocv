@@ -1,5 +1,7 @@
 package src.ddpsc.phenocv.computer_vision;
 
+import src.ddpsc.phenocv.utility.Lists;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,5 +46,22 @@ public final class HistogramChannels extends ImageChannels {
         }
 
         return all;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null || ! (obj instanceof HistogramChannels))
+            return false;
+        else
+            return equals((HistogramChannels)obj);
+    }
+
+    public boolean equals(HistogramChannels channels) {
+        return Lists.sameChannels(this.channels, channels.channels);
+    }
+
+    @Override
+    public int hashCode() {
+        return channels.hashCode();
     }
 }

@@ -1,5 +1,6 @@
 package src.ddpsc.phenocv.utility;
 
+import src.ddpsc.phenocv.computer_vision.Channel;
 import src.ddpsc.phenocv.computer_vision.ColorImage;
 import src.ddpsc.phenocv.computer_vision.Mask;
 
@@ -27,4 +28,18 @@ public class Lists {
         return pairs;
     }
 
+    public static boolean sameChannels(List<Channel> channels1, List<Channel> channels2) {
+
+        if (channels1 == null || channels2 == null)
+            return false;
+
+        if (channels1.size() != channels2.size())
+            return false;
+
+        for (int i = 0; i < channels1.size(); i++)
+            if (channels1.get(i) != channels2.get(i))
+                return false;
+
+        return true;
+    }
 }

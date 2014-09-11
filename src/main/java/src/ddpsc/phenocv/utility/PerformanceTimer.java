@@ -6,7 +6,7 @@ import java.util.List;
 /**
  * @author cjmcentee
  */
-public class Interval {
+public class PerformanceTimer {
 
     private static int errors = 0;
 

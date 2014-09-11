@@ -56,10 +56,9 @@ public final class Mask extends GrayImage {
         return new Mask(new Mat());
     }
 
-    public static Mask showsAll() {
-        Mask show = new Mask(new Mat());
+    public static Mask showsAll(Size size) {
+        Mask show = new Mask(new Mat(size, CvType.CV_8UC1));
         show.image.setTo(new Scalar(255));
-        Imgproc.cvtColor(show.image, show.image, CvType.CV_8UC1);
 
         return show;
     }
@@ -83,13 +82,14 @@ public final class Mask extends GrayImage {
     public void morphologicalFilter(MorphType morphType, double strength) {
         Mat kernel = Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(strength, strength));
         Imgproc.morphologyEx(image, image, morphType.type(), kernel);
+
+        kernel.release();
     }
 
 
     /// ======================================================================
     /// Conversion and Copying
     /// ======================================================================
-
     @Override
     public Image copy() {
         Mat copy = new Mat();

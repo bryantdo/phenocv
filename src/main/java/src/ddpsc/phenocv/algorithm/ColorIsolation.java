@@ -9,7 +9,7 @@ import java.util.List;
 /**
  * @author cjmcentee
  */
-public class ColorIsolation implements Writable {
+public class ColorIsolation implements Writable, Releasable {
 
     boolean trained = false;
     HistogramChannels channels;
@@ -17,7 +17,7 @@ public class ColorIsolation implements Writable {
 
     public ColorIsolation(HistogramChannels channels) {
         this.channels = channels;
-        histogram = Histogram.Blank(channels);
+        histogram = Histogram.blank(channels);
     }
 
     public void train(List<Tuple<ColorImage, Mask>> trainingImages) {
@@ -29,8 +29,9 @@ public class ColorIsolation implements Writable {
             Mask mask = trainingPair.item2;
 
             Histogram maskHistogram = Histogram.fromImage(channels, image, mask);
+            histogram.combineWith(maskHistogram);
 
-            histogram = histogram.combineWith(maskHistogram);
+            maskHistogram.release();
         }
 
         trained = true;
@@ -50,9 +51,40 @@ public class ColorIsolation implements Writable {
 
             ColorImage copy = (ColorImage) image.copy();
             copy.maskWith(mask);
+
+            backProjection.release();
+            mask.release();
+
             return copy;
         }
     }
+
+    public Tuple<GrayImage, ColorImage> detailedIsolation(ColorImage image) {
+        if (trained == false)
+            return new Tuple<GrayImage, ColorImage>(GrayImage.empty(), image);
+
+        else {
+            GrayImage backProjection = histogram.backProjectionOf(image);
+            Mask mask = backProjection.toMask();
+
+            ColorImage copy = (ColorImage) image.copy();
+            copy.maskWith(mask);
+
+            mask.release();
+
+            return new Tuple<GrayImage, ColorImage>(backProjection, copy);
+        }
+    }
+
+
+    /// ======================================================================
+    /// Releasable
+    /// ======================================================================
+    @Override
+    public void release() {
+        histogram.release();
+    }
+
 
     /// ======================================================================
     /// Writable
