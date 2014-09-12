@@ -45,4 +45,8 @@ public abstract class CalculatedObjectFactory<OutType, InType> {
     public boolean calculated() {
         return calculatedObject != null;
     }
+
+    public void reset() {
+        calculatedObject = null;
+    }
 }

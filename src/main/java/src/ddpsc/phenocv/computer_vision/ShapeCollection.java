@@ -8,6 +8,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * Defines a collection of shapes.
+ *
+ * Due to the need for clean, unambiguous shapes, shapes can only be taken from a
+ * {@link GrayImage}. And even then it is preferred that they be taken from thresholded
+ * {@link GrayImage}.
+ *
  * @author cjmcentee
  */
 public class ShapeCollection implements Writable, Releasable {

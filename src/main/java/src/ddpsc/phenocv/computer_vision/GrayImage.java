@@ -8,6 +8,21 @@ import org.opencv.highgui.Highgui;
 import org.opencv.imgproc.Imgproc;
 
 /**
+ * This is a gray scale image in a single channel.
+ *
+ * Its primary use, aside from being an image, is to be a mask.
+ *
+ * A mask is used to be overlaid onto another image to hide/reveal
+ * particular pixels within the other image. In order for a mask
+ * to do this, it must be of the same dimensions as the target
+ * image. Then the target image and the mask can be placed
+ * on top of one another and any pixels of the mask that are black
+ * are filtered out of the target image. The only remaining pixels
+ * are those where the mask was non-black.
+ *
+ * It is recommended that users threshold any GrayImage objects
+ * before using them as masks to avoid strange and unexpected errors.
+ *
  * @author cjmcentee
  */
 public class GrayImage extends Image {
@@ -47,7 +62,7 @@ public class GrayImage extends Image {
     }
 
     /**
-     * Returns an empty image with zero pixels
+     * Returns an empty image with zero pixels.
      *
      * @return      empty image
      */
@@ -55,6 +70,14 @@ public class GrayImage extends Image {
         return new GrayImage(new Mat());
     }
 
+    /**
+     * Generates a GrayImage that behaves as a mask that blocks all pixels.
+     *
+     * This means the image is all black.
+     *
+     * @param size      size of the returned image
+     * @return          an all black image
+     */
     public static GrayImage maskBlockAll(Size size) {
         GrayImage show = new GrayImage(new Mat(size, CvType.CV_8UC1));
         show.image.setTo(new Scalar(0));
@@ -62,6 +85,14 @@ public class GrayImage extends Image {
         return show;
     }
 
+    /**
+     * Generates a GrayImage that behaves as a mask that reveals all pixels.
+     *
+     * This means the image is all white.
+     *
+     * @param size      size of the returned image
+     * @return          an all white image
+     */
     public static GrayImage maskShowAll(Size size) {
         GrayImage show = new GrayImage(new Mat(size, CvType.CV_8UC1));
         show.image.setTo(new Scalar(255));
@@ -72,6 +103,22 @@ public class GrayImage extends Image {
     /// ======================================================================
     /// Image Manipulation
     /// ======================================================================
+
+    /**
+     * Sets the pixels of this image to the pixels supplied.
+     *
+     * Because GrayImage is a single channel image, the pixels, unlike
+     * {@link ColorImage#setPixels(byte[], int)} are arrayed in the
+     * expected manner:
+     *  {pixel1, pixel2, pixel3, pixel4, etc...}
+     *
+     *  The width is the width of the image the pixels represent.
+     *  The width does not have to be the width of this image as it is overwritten
+     *  if it is different.
+     *
+     * @param pixels        new pixels for this image
+     * @param width         width of the new image
+     */
     @Override
     public void setPixels(byte[] pixels, int width) {
         int numberPixels = pixels.length / 1;

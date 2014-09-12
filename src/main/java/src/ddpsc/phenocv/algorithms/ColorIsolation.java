@@ -1,11 +1,10 @@
 package src.ddpsc.phenocv.algorithms;
 
-import src.ddpsc.phenocv.computer_vision.Channel;
+import src.ddpsc.phenocv.computer_vision.HistogramPartition;
 import src.ddpsc.phenocv.computer_vision.*;
 import src.ddpsc.phenocv.utility.Lists;
 import src.ddpsc.phenocv.utility.Tuple;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -14,12 +13,12 @@ import java.util.List;
 public class ColorIsolation implements Releasable {
 
     boolean trained = false;
-    Channel channel;
+    HistogramPartition histogramPartition;
     Histogram histogram;
 
-    public ColorIsolation(Channel channel) {
-        this.channel = channel;
-        histogram = Histogram.blank(channel);
+    public ColorIsolation(HistogramPartition histogramPartition) {
+        this.histogramPartition = histogramPartition;
+        histogram = Histogram.blank(histogramPartition);
     }
 
     public void train(List<Tuple<ColorImage, GrayImage>> trainingImages) {
@@ -30,7 +29,7 @@ public class ColorIsolation implements Releasable {
             ColorImage image = trainingPair.item1;
             GrayImage mask = trainingPair.item2;
 
-            histogram.addImageData(channel, image, mask);
+            histogram.addImageData(histogramPartition, image, mask);
         }
 
         trained = true;

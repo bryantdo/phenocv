@@ -3,7 +3,7 @@ package test.ddpsc.phenocv.algorithms_test;
 import org.junit.Test;
 import org.opencv.core.Core;
 import src.ddpsc.phenocv.algorithms.ColorIsolation;
-import src.ddpsc.phenocv.computer_vision.Channel;
+import src.ddpsc.phenocv.computer_vision.HistogramPartition;
 import src.ddpsc.phenocv.computer_vision.ColorImage;
 import src.ddpsc.phenocv.computer_vision.GrayImage;
 import src.ddpsc.phenocv.computer_vision.ReleaseContainer;
@@ -55,12 +55,12 @@ public class ColorIsolationTest {
         List<Tuple<ColorImage, GrayImage>> trainingPairs = Lists.loadMaskedImagePairs(trainingFiles);
         List<ColorImage> testImages = getTestImages();
 
-        Channel[] imageChannels = Channel.values(100);
+        HistogramPartition[] histogramPartitions = HistogramPartition.values(100);
 
-        for (Channel channel : imageChannels) {
+        for (HistogramPartition histogramPartition : histogramPartitions) {
 
-            System.out.println("Channel: " + channel.toString());
-            ColorIsolation colorIsolation = new ColorIsolation(channel);
+            System.out.println("Channel: " + histogramPartition.toString());
+            ColorIsolation colorIsolation = new ColorIsolation(histogramPartition);
             colorIsolation.train(trainingPairs);
             for (int i = 0; i < testImages.size(); i++) {
                 ColorImage image = testImages.get(i);
@@ -71,13 +71,13 @@ public class ColorIsolationTest {
                 PerformanceTimer.end();
 
                 String backProjectionSaveName =
-                        RESULTS_ROOT + channel.toString() + " "
+                        RESULTS_ROOT + histogramPartition.toString() + " "
                                 + TEST_PREFIX + i + RESULTS_SUFFIX
                                 + " back projection" + FILETYPE;
                 isolationData.item1.writeTo(backProjectionSaveName);
 
                 String imageSaveName =
-                        RESULTS_ROOT + channel.toString() + " "
+                        RESULTS_ROOT + histogramPartition.toString() + " "
                                 + TEST_PREFIX + i + RESULTS_SUFFIX
                                 + FILETYPE;
                 isolationData.item2.writeTo(imageSaveName);

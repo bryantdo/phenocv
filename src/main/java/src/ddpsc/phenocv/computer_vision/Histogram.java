@@ -10,6 +10,19 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
+ * Represents a histogram. A histogram is a measure of the overall color of each pixel
+ * in an image.
+ *
+ * The histogram can represents any color space desired by the user.
+ *
+ * These histograms are only 3D histograms are they have the highest fidelity
+ * and best isolation rate when back-projecting. As this API is specialized
+ * for plant identification, ancillary elements like {@link GrayImage} histograms
+ * and 2D histograms are excluded.
+ *
+ * The main purpose of this class is to get a histogram and then back-project
+ * it onto a different image in an attempt to isolate certain elements of an image.
+ *
  * @author cjmcentee
  */
 public final class Histogram implements Releasable {
@@ -17,7 +30,7 @@ public final class Histogram implements Releasable {
     public static final double NO_SCALING = 1;
 
     Mat histogram;
-    Channel channel;
+    HistogramPartition histogramPartition;
 
 
     /// ======================================================================
@@ -26,15 +39,15 @@ public final class Histogram implements Releasable {
     private Histogram() {
     }
 
-    Histogram(Channel channel, Mat histogramMat) {
-        this.channel = channel;
+    Histogram(HistogramPartition histogramPartition, Mat histogramMat) {
+        this.histogramPartition = histogramPartition;
 
         histogram = histogramMat;
     }
 
-    public static Histogram blank(Channel channel) {
+    public static Histogram blank(HistogramPartition histogramPartition) {
         Histogram histogram = new Histogram();
-        histogram.channel = channel;
+        histogram.histogramPartition = histogramPartition;
         histogram.histogram = new Mat();
 
         return histogram;
@@ -42,7 +55,7 @@ public final class Histogram implements Releasable {
 
     public Histogram copy() {
         Histogram copy = new Histogram();
-        copy.channel = channel;
+        copy.histogramPartition = histogramPartition;
         copy.histogram = Copy.matrix(histogram);
 
         return copy;
@@ -70,13 +83,13 @@ public final class Histogram implements Releasable {
 
          Mat backProjectedImage = new Mat();
 
-        List<Mat> imageMatrix = Arrays.asList(image.cvAsChannel(channel));
+        List<Mat> imageMatrix = Arrays.asList(image.cvAsChannel(histogramPartition));
         Imgproc.calcBackProject(
                 imageMatrix,
-                channel.indices(),
+                histogramPartition.indices(),
                 histogram,
                 backProjectedImage,
-                channel.ranges(),
+                histogramPartition.ranges(),
                 NO_SCALING);
 
         ReleaseContainer.releaseMatrices(imageMatrix);
@@ -84,57 +97,57 @@ public final class Histogram implements Releasable {
         return new GrayImage(backProjectedImage);
     }
 
-    public static Histogram fromImage(Channel channel, ColorImage image, GrayImage mask) {
+    public static Histogram fromImage(HistogramPartition histogramPartition, ColorImage image, GrayImage mask) {
 
         Mat histogram = new Mat();
-        List<Mat> convertedMatrix = Arrays.asList(image.cvAsChannel(channel));
+        List<Mat> convertedMatrix = Arrays.asList(image.cvAsChannel(histogramPartition));
         Imgproc.calcHist(
                 convertedMatrix,
-                channel.indices(),
+                histogramPartition.indices(),
                 mask.image,
                 histogram,
-                channel.sizes(),
-                channel.ranges());
+                histogramPartition.sizes(),
+                histogramPartition.ranges());
 
         ReleaseContainer.releaseMatrices(convertedMatrix);
 
-        return new Histogram(channel, histogram);
+        return new Histogram(histogramPartition, histogram);
     }
 
-    public static Histogram fromImage(Channel channel, ColorImage image) {
-        return fromImage(channel, image, GrayImage.maskShowAll(image.size()));
+    public static Histogram fromImage(HistogramPartition histogramPartition, ColorImage image) {
+        return fromImage(histogramPartition, image, GrayImage.maskShowAll(image.size()));
     }
 
     /**
      * Adds the histogram of the supplied image-mask combo to this histogram.
      *
-     * Similar to {@link Histogram#fromImage(Channel, ColorImage, GrayImage)}, but
+     * Similar to {@link Histogram#fromImage(HistogramPartition, ColorImage, GrayImage)}, but
      * instead of returning a new histogram, it adds the data to this histogram.
      *
-     * @param channel       channel to convert the image into
+     * @param histogramPartition       channel to convert the image into
      * @param image         image to get histogram data from
      * @param mask          mask to select which pixels are turned into histogram data
      */
-    public void addImageData(Channel channel, ColorImage image, GrayImage mask) {
+    public void addImageData(HistogramPartition histogramPartition, ColorImage image, GrayImage mask) {
 
-        if (this.channel != channel )
+        if (this.histogramPartition != histogramPartition)
             return;
 
-        List<Mat> convertedMatrix = Arrays.asList(image.cvAsChannel(channel));
+        List<Mat> convertedMatrix = Arrays.asList(image.cvAsChannel(histogramPartition));
         Imgproc.calcHist(
                 convertedMatrix,
-                channel.indices(),
+                histogramPartition.indices(),
                 mask.image,
                 this.histogram,
-                channel.sizes(),
-                channel.ranges(),
+                histogramPartition.sizes(),
+                histogramPartition.ranges(),
                 true);
 
         ReleaseContainer.releaseMatrices(convertedMatrix);
     }
 
-    public void addImageData(Channel channel, ColorImage image) {
-        addImageData(channel, image, GrayImage.maskShowAll(image.size()));
+    public void addImageData(HistogramPartition histogramPartition, ColorImage image) {
+        addImageData(histogramPartition, image, GrayImage.maskShowAll(image.size()));
     }
 
 
@@ -150,13 +163,13 @@ public final class Histogram implements Releasable {
             return;
 
         if (this.histogram == null) { // not same as this being null, this.histogram is Matrix field
-            this.channel = mergingHistogram.channel;
+            this.histogramPartition = mergingHistogram.histogramPartition;
             this.histogram = Copy.matrix(mergingHistogram.histogram);
 
             return;
         }
 
-        if (channel.equals(mergingHistogram.channel))
+        if (histogramPartition.equals(mergingHistogram.histogramPartition))
             Core.add(this.histogram, mergingHistogram.histogram, this.histogram);
     }
 

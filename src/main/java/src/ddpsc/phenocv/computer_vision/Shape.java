@@ -8,6 +8,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * Defines a Shape, a continuous group of pixels. The shape isn't necessarily
+ * tied to an image, but it's normal usecase is to indicate to an algorithm
+ * which portions of an image are distinct from each other.
+ *
+ * This is an abstraction on top of OpenCVs contour system. Instead of dealing
+ * with a mess of inner and outer contours, shapes are defined by their pixels
+ * rather than their boundaries, which can be many and complicated.
+ *
+ * If a shape contains another continuous block of pixels instead of one of its
+ * holes, then that shape is another, separate shape. No record is kept of
+ * ownership even if one shape is wholly encompassed by another. That functionality
+ * isn't currently needed by any of the higher level algorithms.
+ *
  * @author cjmcentee
  */
 public class Shape implements Writable, Releasable {

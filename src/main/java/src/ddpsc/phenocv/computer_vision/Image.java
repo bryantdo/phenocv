@@ -141,15 +141,6 @@ public abstract class Image implements Writable, Releasable {
             Imgproc.medianBlur(image, image, strength);
     }
 
-    public GrayImage segment(GrayImage segmentGuessImage) {
-        Mat markers = new Mat();
-        segmentGuessImage.image.convertTo(markers, CvType.CV_32S);
-
-        Imgproc.watershed(image, markers);
-
-        return new GrayImage(markers);
-    }
-
 
     /// ======================================================================
     /// Conversion and Copying
@@ -174,26 +165,68 @@ public abstract class Image implements Writable, Releasable {
 
     public abstract void setPixels(byte[] pixels, int width);
 
+    /**
+     * Returns the number of pixels in the image.
+     *
+     * This is equivalent to width*height.
+     *
+     * @return      number of pixels in the image
+     */
     public int numberPixels() {
         return (int) image.total();
     }
 
+    /**
+     * Returns the width in pixels of this image/
+     *
+     * This is the same as returning the columns.
+     *
+     * @return      width in pixels of the image
+     */
     public int width() {
         return image.width();
     }
 
+    /**
+     * Returns the height in pixels of this image.
+     *
+     * This is the same as returning the rows.
+     *
+     * @return      height in pixels of the image
+     */
     public int height() {
         return image.height();
     }
 
+    /**
+     * Returns a rectangle with top left at (0, 0) and equal to
+     * the size of this image.
+     *
+     * @return      rectangle size of the image
+     */
     public Rect rectangle() {
         return new Rect(new Point(), image.size());
     }
 
+    /**
+     * Returns the size (width/height) of this image.
+     *
+     * @return      size of image
+     */
     public Size size() {
         return image.size();
     }
 
+    /**
+     * Returns the type of this image in OpenCV's typing format.
+     *
+     * Use {@link src.ddpsc.phenocv.debug.Readable#type(int)} to process
+     * the returned value into something more meaningful.
+     *
+     * All pixels will be of the type supplied. OpenCV does not mix types.
+     *
+     * @return      openCV type of the image pixels
+     */
     public int valueType() {
         return image.type();
     }

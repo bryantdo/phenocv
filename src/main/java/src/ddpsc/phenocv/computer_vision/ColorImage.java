@@ -6,6 +6,19 @@ import org.opencv.highgui.Highgui;
 import org.opencv.imgproc.Imgproc;
 
 /**
+ * This class represents an image of 3-channel color. The class itself naturally works in BGR (note,
+ * not RGB), but a developer can pull out matrices of other color channels to work with those if
+ * need be.
+ *
+ * Asking for a color conversion of the same channel more than once doesn't cause it to be
+ * re-computed. However manually setting the pixels of this image does wipe out the different
+ * calculated images as they're no longer accurate as the pixels have changed.
+ *
+ * Wraps the OpenCV {@link Mat} "class".
+ *
+ * If a developer extends this class, they must take care to reset the color conversion objects
+ * any time they modify the values of the root OpenCV matrix.
+ *
  * @author cjmcentee
  */
 public class ColorImage extends Image {
@@ -88,6 +101,8 @@ public class ColorImage extends Image {
      *      {pixel1Blue, pixel1Green, pixel1Red, pixel2Blue, pixel2Green, ... etc}
      *
      * The width represents the width of the image.
+     * The width does not have to be the width of this image as it is overwritten
+     *  if it is different.
      *
      * @param pixels        pixels to set this image to
      * @param width         width of the image
@@ -102,6 +117,8 @@ public class ColorImage extends Image {
 
         image = new Mat(rows, columns, CvType.CV_8UC3);
         image.put(0, 0, pixels);
+
+        resetFactories();
     }
 
     /// ======================================================================
@@ -159,11 +176,11 @@ public class ColorImage extends Image {
      * For use in adding functionality to this library without
      * forking or modifying its source code.
      *
-     * @param channel       the channel of the resulting Matrix
+     * @param histogramPartition       the channel of the resulting Matrix
      * @return              {@link Mat} representing the image in the requested format format
      */
-    public Mat cvAsChannel(Channel channel) {
-        switch (channel.colorSpace) {
+    public Mat cvAsChannel(HistogramPartition histogramPartition) {
+        switch (histogramPartition.colorSpace) {
             case BGR:
                 return cvAsBGRMatrix();
             case HSV:
@@ -220,5 +237,15 @@ public class ColorImage extends Image {
     @Override
     String debugString() {
         return "Color Image\n" + super.debugString();
+    }
+
+    private void resetFactories() {
+        hsvImage.reset();
+        labImage.reset();
+        ycrcbImage.reset();
+        luvImage.reset();
+        hlsImage.reset();
+        xyzImage.reset();
+        yuvImage.reset();
     }
 }

@@ -7,6 +7,15 @@ import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
 /**
+ * Represents a colored pixel of an image.
+ *
+ * Can be converted to various channels, though only BGR <-> HSV are currently implemented.
+ *
+ * By default the pixel is in the BGR channel. The RGB channel is not available.
+ * So bear in mind that {@link ColorPixel#channel1} is BLUE in BGR, not RED.
+ *
+ * Wraps the OpenCV {@link Scalar} "class".
+ *
  * @author cjmcentee
  */
 public class ColorPixel {

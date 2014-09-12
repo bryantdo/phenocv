@@ -2,7 +2,7 @@ package test.ddpsc.phenocv.computer_vision_test;
 
 import org.junit.Test;
 import org.opencv.core.Core;
-import src.ddpsc.phenocv.computer_vision.Channel;
+import src.ddpsc.phenocv.computer_vision.HistogramPartition;
 import src.ddpsc.phenocv.computer_vision.ColorSpace;
 import src.ddpsc.phenocv.computer_vision.ColorImage;
 import src.ddpsc.phenocv.computer_vision.GrayImage;
@@ -23,7 +23,7 @@ public class HistogramTest {
     }
 
     private static final String NAME_PREFIX = "Histogram Test ";
-    private static final Channel BGR = new Channel(ColorSpace.BGR, 75);
+    private static final HistogramPartition BGR = new HistogramPartition(ColorSpace.BGR, 75);
 
     @Test
     public void TestBackProjectionOf() {

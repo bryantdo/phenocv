@@ -1,6 +1,6 @@
 package src.ddpsc.phenocv.utility;
 
-import src.ddpsc.phenocv.computer_vision.Channel;
+import src.ddpsc.phenocv.computer_vision.HistogramPartition;
 import src.ddpsc.phenocv.computer_vision.ColorImage;
 import src.ddpsc.phenocv.computer_vision.GrayImage;
 
@@ -28,7 +28,7 @@ public class Lists {
         return pairs;
     }
 
-    public static boolean sameChannels(List<Channel> channels1, List<Channel> channels2) {
+    public static boolean sameChannels(List<HistogramPartition> channels1, List<HistogramPartition> channels2) {
 
         if (channels1 == null || channels2 == null)
             return false;
