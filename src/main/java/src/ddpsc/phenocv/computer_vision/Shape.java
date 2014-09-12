@@ -65,18 +65,18 @@ public class Shape implements Writable, Releasable {
         return Core.countNonZero(toBinaryMatrix());
     }
 
-    public Mask zeroedMask() {
-        return new Mask(toBinaryMatrix());
+    public GrayImage zeroedMask() {
+        return new GrayImage(toBinaryMatrix());
     }
 
-    public Mask imageMask(Size imageSize) {
+    public GrayImage imageMask(Size imageSize) {
         Mat mask = new Mat(imageSize, CvType.CV_8UC1);
         Mat subMask = mask.submat(boundingBox()); // does not need release, shallow copy
         Mat shape = toBinaryMatrix(); // references factory-built field, do not release
 
         shape.copyTo(subMask); // subMask is shallow reference to mask
 
-        return new Mask(mask);
+        return new GrayImage(mask);
     }
 
     public Rect boundingBox() {
@@ -84,8 +84,30 @@ public class Shape implements Writable, Releasable {
         return boundingBox;
     }
 
+    public ColorPixel averagePixelOf(Image image) {
+        Mat subImage = subImage(image.image);
+        GrayImage subImageMask = zeroedMask();
+
+        return new ColorPixel(Core.mean(subImage, subImageMask.image));
+    }
+
+    private Mat subImage(Mat image) {
+        Mat subImage = image.submat(boundingBox());
+        return subImage;
+    }
+
+    List<MatOfPoint> contours() {
+        List<MatOfPoint> contours = new ArrayList<MatOfPoint>(1 + innerContours.size());
+        contours.add(outerContour);
+        contours.addAll(innerContours);
+        return contours;
+    }
+
     Mat hierarchy() {
-        MatOfInt4 hierarchy = new MatOfInt4();
+        if (innerContours.size() == 0)
+            return new Mat(new Size(0, 4), CvType.CV_32SC4);
+
+        Mat hierarchy = new Mat(new Size(innerContours.size() + 1, 4), CvType.CV_32SC4);
         // 4 entries per relation, entry values:
         //      next, previous, first child, parent
         int relations[] = new int[4*(innerContours.size() + 1)];
@@ -93,7 +115,10 @@ public class Shape implements Writable, Releasable {
         // outer contour
         relations[0] = -1;
         relations[1] = -1;
-        relations[2] =  1;
+        if (innerContours.size() > 0)
+            relations[2] =  1;
+        else
+            relations[2] = - 1;
         relations[3] = -1;
 
         // inner contours
@@ -114,7 +139,6 @@ public class Shape implements Writable, Releasable {
             relations[4*i + 7] =  0; // parent is first row
         }
 
-        hierarchy.alloc(relations.length);
         hierarchy.put(0, 0, relations);
         return hierarchy;
     }

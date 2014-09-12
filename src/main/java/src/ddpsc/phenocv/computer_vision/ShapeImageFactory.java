@@ -2,14 +2,16 @@ package src.ddpsc.phenocv.computer_vision;
 
 import org.opencv.core.*;
 import org.opencv.imgproc.Imgproc;
-import src.ddpsc.phenocv.utility.CalculatedObjectFactory;
+import src.ddpsc.phenocv.debug.*;
+import src.ddpsc.phenocv.debug.Readable;
+import src.ddpsc.phenocv.utility.ReversableObjectFactory;
 
 import java.util.Arrays;
 
 /**
 * @author cjmcentee
 */
-public class ShapeImageFactory extends CalculatedObjectFactory<Mat, Shape> implements Releasable{
+public class ShapeImageFactory extends ReversableObjectFactory<Mat, Shape> implements Releasable {
 
     // Display settings for drawing the shape onto a mask
     static final int DRAW_ALL = -1;
@@ -40,11 +42,13 @@ public class ShapeImageFactory extends CalculatedObjectFactory<Mat, Shape> imple
         Mat shapeImage = new Mat(shape.boundingBox().size(), CvType.CV_8U);
         Mat shapeHierarchy = shape.hierarchy();
 
-        final int oneContour = 0;
+        final int allContours = -1;
+        System.out.println(shapeHierarchy.total());
+        System.out.println(Readable.type(shapeHierarchy.type()));
         Imgproc.drawContours(
                 shapeImage,
-                Arrays.asList(this.shape.outerContour),
-                oneContour,
+                this.shape.contours(),
+                allContours,
                 WHITE,
                 FILL_AREA,
                 SOLID_PERIMETER,

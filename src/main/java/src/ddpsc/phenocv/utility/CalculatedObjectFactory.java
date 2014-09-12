@@ -34,9 +34,15 @@ public abstract class CalculatedObjectFactory<OutType, InType> {
     protected abstract OutType calculate(InType seed);
 
     public OutType getFrom(InType seed) {
-        if (calculatedObject == null)
-            return calculate(seed);
+        if (calculatedObject == null) {
+            calculatedObject = calculate(seed);
+            return calculatedObject;
+        }
         else
             return calculatedObject;
+    }
+
+    public boolean calculated() {
+        return calculatedObject != null;
     }
 }

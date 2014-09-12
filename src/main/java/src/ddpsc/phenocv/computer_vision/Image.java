@@ -77,9 +77,10 @@ public abstract class Image implements Writable, Releasable {
      * Pixels set to black where they overlap with blocked (black) pixels in the mask
      *
      * @param mask mask to block pixels with
-     * @see Mask
+     *
+     * @see GrayImage
      */
-    public void maskWith(Mask mask) {
+    public void maskWith(GrayImage mask) {
         Mat maskedMatrix = new Mat();
         image.copyTo(maskedMatrix, mask.image);
 
@@ -97,7 +98,7 @@ public abstract class Image implements Writable, Releasable {
      * @param shape shape to mask with
      */
     public void maskWith(Shape shape) {
-        Mask shapeMask = shape.imageMask(size());
+        GrayImage shapeMask = shape.imageMask(size());
         maskWith(shapeMask);
 
         shapeMask.release();
@@ -112,11 +113,10 @@ public abstract class Image implements Writable, Releasable {
      * @param shapes shapes to mask with
      */
     public void maskWith(ShapeCollection shapes) {
-        GrayImage grayShapes = shapes.grayImage(size());
-        Mask shapesMask = grayShapes.toMask(1);
+        GrayImage shapesMask = shapes.grayImage(size());
+        shapesMask.threshold(1);
         maskWith(shapesMask);
 
-        grayShapes.release();
         shapesMask.release();
     }
 
@@ -135,7 +135,10 @@ public abstract class Image implements Writable, Releasable {
      * @param strength strength of filter
      */
     public void medianFilter(int strength) {
-        Imgproc.medianBlur(image, image, strength);
+        if (strength % 2 == 0)
+            Imgproc.medianBlur(image, image, strength + 1);
+        else
+            Imgproc.medianBlur(image, image, strength);
     }
 
     public GrayImage segment(GrayImage segmentGuessImage) {

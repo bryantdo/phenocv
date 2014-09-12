@@ -2,12 +2,12 @@ package src.ddpsc.phenocv.computer_vision;
 
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.MatOfPoint2f;
-import src.ddpsc.phenocv.utility.CalculatedObjectFactory;
+import src.ddpsc.phenocv.utility.ReversableObjectFactory;
 
 /**
 * @author cjmcentee
 */
-final class MatOfPoint2fFactory extends CalculatedObjectFactory<MatOfPoint2f, MatOfPoint> implements Releasable{
+final class MatOfPoint2fFactory extends ReversableObjectFactory<MatOfPoint2f, MatOfPoint> implements Releasable{
 
     MatOfPoint2fFactory() {
         super();

@@ -15,6 +15,7 @@ public class ShapeCollection implements Writable, Releasable {
     ShapeCollectionImageFactory shapesImage;
     ShapeListFactory shapesList;
 
+    // Used to build shapes list, otherwise not-necessary, can be null
     Mat hierarchy;
     List<MatOfPoint> contours;
 
@@ -22,6 +23,12 @@ public class ShapeCollection implements Writable, Releasable {
     /// ======================================================================
     /// Constructors
     /// ======================================================================
+    public ShapeCollection(List<Shape> shapes) {
+        shapesList.setFrom(shapes);
+        hierarchy = null;
+        contours = null;
+    }
+
     ShapeCollection(List<MatOfPoint> contours, Mat hierarchy) {
         this.contours = contours;
         this.hierarchy = hierarchy;
@@ -45,7 +52,10 @@ public class ShapeCollection implements Writable, Releasable {
     }
 
     public Rect boundingBox() {
-        if (contours.size() == 0)
+        if (contours == null)
+            if (! shapesList.calculated())
+                return new Rect();
+        else if (contours.size() == 0)
             return new Rect();
 
         List<Shape> shapes = shapes(); // references factory-field, do not release
@@ -79,6 +89,13 @@ public class ShapeCollection implements Writable, Releasable {
         return new GrayImage(image);
     }
 
+    public GrayImage mask(Size imageSize) {
+        GrayImage image = grayImage(imageSize);
+        image.threshold();
+
+        return image;
+    }
+
 
     /// ======================================================================
     /// Writable
@@ -87,8 +104,10 @@ public class ShapeCollection implements Writable, Releasable {
     public void release() {
         shapesImage.release();
         shapesList.release();
-        hierarchy.release();
-        ReleaseContainer.releaseMatrices(contours);
+        if (hierarchy != null)
+            hierarchy.release();
+        if (contours != null)
+            ReleaseContainer.releaseMatrices(contours);
     }
 
 

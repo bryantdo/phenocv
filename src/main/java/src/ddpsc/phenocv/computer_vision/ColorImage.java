@@ -1,23 +1,22 @@
 package src.ddpsc.phenocv.computer_vision;
 
-import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.highgui.Highgui;
 import org.opencv.imgproc.Imgproc;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * @author cjmcentee
  */
 public class ColorImage extends Image {
 
-    private HSVFactory hsvImage;
-    private LabFactory labImage;
-    private YCrCbFactory ycrcbImage;
+    private ColorHSVFactory hsvImage;
+    private ColorLabFactory labImage;
+    private ColorYCrCbFactory ycrcbImage;
+    private ColorLuvFactory luvImage;
+    private ColorHLSFactory hlsImage;
+    private ColorXYZFactory xyzImage;
+    private ColorYUVFactory yuvImage;
 
 
     /// ======================================================================
@@ -67,15 +66,32 @@ public class ColorImage extends Image {
     }
 
     private void _init() {
-        hsvImage = new HSVFactory();
-        labImage = new LabFactory();
-        ycrcbImage = new YCrCbFactory();
+        hsvImage = new ColorHSVFactory();
+        labImage = new ColorLabFactory();
+        ycrcbImage = new ColorYCrCbFactory();
+        luvImage = new ColorLuvFactory();
+        hlsImage = new ColorHLSFactory();
+        xyzImage = new ColorXYZFactory();
+        yuvImage = new ColorYUVFactory();
     }
 
 
     /// ======================================================================
     /// Image Manipulation
     /// ======================================================================
+
+    /**
+     * Sets the pixels of this image to the supplied pixels.
+     *
+     * The pixel array splits the color channels into three parts. So the array should be
+     * the form:
+     *      {pixel1Blue, pixel1Green, pixel1Red, pixel2Blue, pixel2Green, ... etc}
+     *
+     * The width represents the width of the image.
+     *
+     * @param pixels        pixels to set this image to
+     * @param width         width of the image
+     */
     @Override
     public void setPixels(byte[] pixels, int width) {
         int numberPixels = pixels.length / 3;
@@ -87,13 +103,6 @@ public class ColorImage extends Image {
         image = new Mat(rows, columns, CvType.CV_8UC3);
         image.put(0, 0, pixels);
     }
-
-    //    public void grabCut(GrayImage mask) {
-//        Mat background = new Mat();
-//        Mat foreground = new Mat();
-//        Imgproc.grabCut(image, mask.image, rectangle(), background, foreground, 4, Imgproc.GC_INIT_WITH_MASK);
-//    }
-
 
     /// ======================================================================
     /// Conversion and Copying
@@ -118,48 +127,6 @@ public class ColorImage extends Image {
         return new GrayImage(grayscale);
     }
 
-    /**
-     * Returns a {@link GrayImage} of the specified channel.
-     *
-     * @param channel       channel to retrieve
-     * @return              image of the specified channel
-     */
-    public GrayImage getChannel(Channel channel) {
-
-        // Get each channel
-        List<Mat> channels = new ArrayList<Mat>();
-        Mat convertedImage = getWholeMatOf(channel); // reference to field variable, do not release
-        Core.split(convertedImage, channels);
-
-        // Return only the relevant channel
-        switch (channel) {
-            case VALUE:
-            case RED:
-            case B:
-            case Cb:
-                channels.get(0).release();
-                channels.get(1).release();
-                return new GrayImage(channels.get(2));
-
-            case SATURATION:
-            case GREEN:
-            case A:
-            case Cr:
-                channels.get(0).release();
-                channels.get(2).release();
-                return new GrayImage(channels.get(1));
-
-            case HUE:
-            case BLUE:
-            case LIGHTNESS:
-            case Y:
-            default:
-                channels.get(1).release();
-                channels.get(2).release();
-                return new GrayImage(channels.get(0));
-        }
-    }
-
 
     /// ======================================================================
     /// Releasable
@@ -170,6 +137,10 @@ public class ColorImage extends Image {
         hsvImage.release();
         labImage.release();
         ycrcbImage.release();
+        luvImage.release();
+        hlsImage.release();
+        xyzImage.release();
+        yuvImage.release();
     }
 
 
@@ -183,39 +154,63 @@ public class ColorImage extends Image {
     }
 
     /**
-     * Access to the OpenCV Java binding root object.
+     * Access to the OpenCV Java binding root object by specified channel.
      *
      * For use in adding functionality to this library without
      * forking or modifying its source code.
      *
-     * @return      {@link Mat} representing the image in HSV format
+     * @param channel       the channel of the resulting Matrix
+     * @return              {@link Mat} representing the image in the requested format format
      */
+    public Mat cvAsChannel(Channel channel) {
+        switch (channel.colorSpace) {
+            case BGR:
+                return cvAsBGRMatrix();
+            case HSV:
+                return cvAsHSVMatrix();
+            case Lab:
+                return cvAsLabMatrix();
+            case YCrCb:
+                return cvAsYCrCbMatrix();
+            case Luv:
+                return cvAsLuvMatrix();
+            case HLS:
+                return cvAsHLSMatrix();
+            case XYZ:
+                return cvAsXYZMatrix();
+            case YUV:
+                return cvAsYUVMatrix();
+            default:
+                return cvAsBGRMatrix();
+        }
+    }
+
+    public Mat cvAsYUVMatrix() {
+        return yuvImage.getFrom(image);
+    }
+
+    public Mat cvAsXYZMatrix() {
+        return xyzImage.getFrom(image);
+    }
+
     public Mat cvAsHSVMatrix() {
         return hsvImage.getFrom(image);
     }
 
-    /**
-     * Access to the OpenCV Java binding root object.
-     *
-     * For use in adding functionality to this library without
-     * forking or modifying its source code.
-     *
-     * @return      {@link Mat} representing the image in Lab format
-     */
+    public Mat cvAsHLSMatrix() {
+        return hlsImage.getFrom(image);
+    }
+
     public Mat cvAsLabMatrix() {
         return labImage.getFrom(image);
     }
 
-    /**
-     * Access to the OpenCV Java binding root object.
-     *
-     * For use in adding functionality to this library without
-     * forking or modifying its source code.
-     *
-     * @return      {@link Mat} representing the image in YCrCb format
-     */
     public Mat cvAsYCrCbMatrix() {
         return ycrcbImage.getFrom(image);
+    }
+
+    public Mat cvAsLuvMatrix() {
+        return luvImage.getFrom(image);
     }
 
 
@@ -225,64 +220,5 @@ public class ColorImage extends Image {
     @Override
     String debugString() {
         return "Color Image\n" + super.debugString();
-    }
-
-    protected Mat makeMatOf(Channel channel1, Channel channel2, Channel channel3) {
-
-        GrayImage channel1Image = getChannel(channel1);
-        GrayImage channel2Image = getChannel(channel2);
-        GrayImage channel3Image = getChannel(channel3);
-        List<Mat> channels = Arrays.asList(channel1Image.image, channel2Image.image, channel3Image.image);
-
-        Mat newImage = new Mat();
-        Core.merge(channels, newImage);
-
-        channel1Image.release();
-        channel2Image.release();
-        channel3Image.release();
-
-        return newImage;
-    }
-
-    protected Mat makeMatOf(Channel channel1, Channel channel2) {
-
-        GrayImage channel1Image = getChannel(channel1);
-        GrayImage channel2Image = getChannel(channel2);
-        List<Mat> channels = Arrays.asList(channel1Image.image, channel2Image.image);
-
-        Mat newImage = new Mat();
-        Core.merge(channels, newImage);
-
-        channel1Image.release();
-        channel2Image.release();
-
-        return newImage;
-    }
-
-    protected Mat makeMatOf(Channel channel) {
-        GrayImage channelImage = getChannel(channel);
-        return channelImage.image;
-    }
-
-    protected Mat getWholeMatOf(Channel channel) {
-        switch (channel) {
-            case HUE:
-            case SATURATION:
-            case VALUE:
-                return cvAsHSVMatrix();
-            case LIGHTNESS:
-            case A:
-            case B:
-                return cvAsLabMatrix();
-            case Y:
-            case Cr:
-            case Cb:
-                return cvAsYCrCbMatrix();
-            case BLUE:
-            case GREEN:
-            case RED:
-            default:
-                return image;
-        }
     }
 }

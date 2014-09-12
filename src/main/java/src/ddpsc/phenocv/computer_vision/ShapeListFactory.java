@@ -2,7 +2,7 @@ package src.ddpsc.phenocv.computer_vision;
 
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
-import src.ddpsc.phenocv.utility.CalculatedObjectFactory;
+import src.ddpsc.phenocv.utility.ReversableObjectFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,7 +10,7 @@ import java.util.List;
 /**
  * @author cjmcentee
  */
-public class ShapeListFactory extends CalculatedObjectFactory<List<Shape>, ShapeCollection> implements Releasable{
+public class ShapeListFactory extends ReversableObjectFactory<List<Shape>, ShapeCollection> implements Releasable{
 
     private ShapeCollection shapeCollection;
 

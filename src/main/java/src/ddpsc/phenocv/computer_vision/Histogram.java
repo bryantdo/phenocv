@@ -2,22 +2,22 @@ package src.ddpsc.phenocv.computer_vision;
 
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
-import org.opencv.highgui.Highgui;
+import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import src.ddpsc.phenocv.utility.Copy;
-import src.ddpsc.phenocv.utility.Lists;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
  * @author cjmcentee
  */
-public final class Histogram implements Writable, Releasable {
+public final class Histogram implements Releasable {
 
     public static final double NO_SCALING = 1;
 
     Mat histogram;
-    HistogramChannels channels;
+    Channel channel;
 
 
     /// ======================================================================
@@ -27,34 +27,22 @@ public final class Histogram implements Writable, Releasable {
     }
 
     Histogram(Channel channel, Mat histogramMat) {
-        channels = new HistogramChannels(channel);
+        this.channel = channel;
 
         histogram = histogramMat;
     }
 
-    Histogram(Channel channel1, Channel channel2, Mat histogramMat) {
-        channels = new HistogramChannels(channel1, channel2);
-
-        histogram = histogramMat;
-    }
-
-    Histogram(HistogramChannels channels, Mat histogramMat) {
-        this.channels = new HistogramChannels(channels);
-
-        histogram = histogramMat;
-    }
-
-    public static Histogram blank(HistogramChannels channels) {
+    public static Histogram blank(Channel channel) {
         Histogram histogram = new Histogram();
-        histogram.channels = channels;
-        histogram.histogram = null;
+        histogram.channel = channel;
+        histogram.histogram = new Mat();
 
         return histogram;
     }
 
     public Histogram copy() {
         Histogram copy = new Histogram();
-        copy.channels = channels;
+        copy.channel = channel;
         copy.histogram = Copy.matrix(histogram);
 
         return copy;
@@ -82,13 +70,13 @@ public final class Histogram implements Writable, Releasable {
 
          Mat backProjectedImage = new Mat();
 
-        List<Mat> imageMatrix = channels.convertedImage(image);
+        List<Mat> imageMatrix = Arrays.asList(image.cvAsChannel(channel));
         Imgproc.calcBackProject(
                 imageMatrix,
-                channels.channelIndices(),
+                channel.indices(),
                 histogram,
                 backProjectedImage,
-                channels.channelRanges(),
+                channel.ranges(),
                 NO_SCALING);
 
         ReleaseContainer.releaseMatrices(imageMatrix);
@@ -96,26 +84,60 @@ public final class Histogram implements Writable, Releasable {
         return new GrayImage(backProjectedImage);
     }
 
-    public static Histogram fromImage(HistogramChannels channels, ColorImage image, Mask mask) {
+    public static Histogram fromImage(Channel channel, ColorImage image, GrayImage mask) {
 
         Mat histogram = new Mat();
-        List<Mat> convertedMatrix = channels.convertedImage(image);
+        List<Mat> convertedMatrix = Arrays.asList(image.cvAsChannel(channel));
         Imgproc.calcHist(
                 convertedMatrix,
-                channels.channelIndices(),
+                channel.indices(),
                 mask.image,
                 histogram,
-                channels.channelSizes(),
-                channels.channelRanges());
+                channel.sizes(),
+                channel.ranges());
 
         ReleaseContainer.releaseMatrices(convertedMatrix);
 
-        return new Histogram(channels, histogram);
+        return new Histogram(channel, histogram);
     }
 
-    public static Histogram fromImage(HistogramChannels channels, ColorImage image) {
-        return fromImage(channels, image, Mask.showsAll(image.size()));
+    public static Histogram fromImage(Channel channel, ColorImage image) {
+        return fromImage(channel, image, GrayImage.maskShowAll(image.size()));
     }
+
+    /**
+     * Adds the histogram of the supplied image-mask combo to this histogram.
+     *
+     * Similar to {@link Histogram#fromImage(Channel, ColorImage, GrayImage)}, but
+     * instead of returning a new histogram, it adds the data to this histogram.
+     *
+     * @param channel       channel to convert the image into
+     * @param image         image to get histogram data from
+     * @param mask          mask to select which pixels are turned into histogram data
+     */
+    public void addImageData(Channel channel, ColorImage image, GrayImage mask) {
+
+        if (this.channel != channel )
+            return;
+
+        List<Mat> convertedMatrix = Arrays.asList(image.cvAsChannel(channel));
+        Imgproc.calcHist(
+                convertedMatrix,
+                channel.indices(),
+                mask.image,
+                this.histogram,
+                channel.sizes(),
+                channel.ranges(),
+                true);
+
+        ReleaseContainer.releaseMatrices(convertedMatrix);
+    }
+
+    public void addImageData(Channel channel, ColorImage image) {
+        addImageData(channel, image, GrayImage.maskShowAll(image.size()));
+    }
+
+
 
     /**
      * Adds the values of the supplied histogram to this histogram.
@@ -128,21 +150,19 @@ public final class Histogram implements Writable, Releasable {
             return;
 
         if (this.histogram == null) { // not same as this being null, this.histogram is Matrix field
-            this.channels = mergingHistogram.channels;
+            this.channel = mergingHistogram.channel;
             this.histogram = Copy.matrix(mergingHistogram.histogram);
 
             return;
         }
 
-        if (channels.equals(mergingHistogram.channels)) {
-//            Mat combinedHistogram = new Mat();
-
+        if (channel.equals(mergingHistogram.channel))
             Core.add(this.histogram, mergingHistogram.histogram, this.histogram);
-//
-//            Mat oldHistogram = this.histogram;
-//            this.histogram = combinedHistogram;
-//            oldHistogram.release();
-        }
+    }
+
+    public void smooth() {
+        Mat kernel = Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(5, 5));
+        Imgproc.morphologyEx(histogram, histogram, Imgproc.MORPH_OPEN, kernel);
     }
 
     /// ======================================================================
@@ -150,13 +170,5 @@ public final class Histogram implements Writable, Releasable {
     /// ======================================================================
     public void release() {
         histogram.release();
-    }
-
-    /// ======================================================================
-    /// Writable
-    /// ======================================================================
-    @Override
-    public void writeTo(String filename) {
-        Highgui.imwrite(filename, histogram);
     }
 }

@@ -31,4 +31,8 @@ hs_err_pid*
 ## Generated Documentation
 #################
 documentation/
-resources/
+resources/images/color isolation test/*.png
+resources/images/color isolation test/results/*.png
+resources/images/color isolation test/results/*/
+resources/images/computer vision test results/*.png
+resources/images/program/

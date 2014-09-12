@@ -38,10 +38,10 @@ public class BackgroundModel {
      * @param image     image to get foreground mask of
      * @return          foreground mask of the image
      */
-    public Mask getForegroundMaskFromImage(Image image) {
+    public GrayImage getForegroundMaskFromImage(Image image) {
         Mat foregroundMask = new Mat();
         model.apply(image.image, foregroundMask, 0); // 0 is no training
-        return new Mask(foregroundMask);
+        return new GrayImage(foregroundMask);
     }
 
     /**
@@ -56,7 +56,7 @@ public class BackgroundModel {
      * @param image     image to remove background from
      */
     public void getForegroundOfImage(Image image) {
-        Mask foregroundMask = getForegroundMaskFromImage(image);
+        GrayImage foregroundMask = getForegroundMaskFromImage(image);
         image.maskWith(foregroundMask);
     }
 }

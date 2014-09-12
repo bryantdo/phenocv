@@ -1,12 +1,10 @@
 package src.ddpsc.phenocv.computer_vision;
 
 import org.opencv.core.Mat;
-import org.opencv.core.MatOfPoint2f;
 import src.ddpsc.phenocv.utility.Tuple;
 
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
 
 /**
  * @author cjmcentee

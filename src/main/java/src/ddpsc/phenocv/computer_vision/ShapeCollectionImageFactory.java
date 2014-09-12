@@ -2,14 +2,14 @@ package src.ddpsc.phenocv.computer_vision;
 
 import org.opencv.core.*;
 import org.opencv.imgproc.Imgproc;
-import src.ddpsc.phenocv.utility.CalculatedObjectFactory;
+import src.ddpsc.phenocv.utility.ReversableObjectFactory;
 
 import java.util.List;
 
 /**
  * @author cjmcentee
  */
-public class ShapeCollectionImageFactory extends CalculatedObjectFactory<Mat, ShapeCollection> implements Releasable{
+public class ShapeCollectionImageFactory extends ReversableObjectFactory<Mat, ShapeCollection> implements Releasable{
 
     private ShapeCollection shapeCollection;
 

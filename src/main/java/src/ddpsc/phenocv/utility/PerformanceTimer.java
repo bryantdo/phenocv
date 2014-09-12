@@ -84,6 +84,7 @@ public class PerformanceTimer {
             intervals = new ArrayList<Long>();
 
         String readout = "Timing Intervals"
+                + "\nTotal Time: " + total()
                 + "\nIntervals: " + intervals.size()
                 + "\nAverage Interval: " + average()
                 + "\nErrors: " + errors;
@@ -94,10 +95,17 @@ public class PerformanceTimer {
         if (intervals == null || intervals.size() == 0)
             return 0;
 
+        return total() / intervals.size();
+    }
+
+    private static long total() {
+        if (intervals == null)
+            return 0;
+
         long total = 0;
         for (Long interval : intervals)
             total += interval;
 
-        return total / intervals.size();
+        return total;
     }
 }

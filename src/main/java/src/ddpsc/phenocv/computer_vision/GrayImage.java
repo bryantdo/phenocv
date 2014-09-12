@@ -2,6 +2,8 @@ package src.ddpsc.phenocv.computer_vision;
 
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.Scalar;
+import org.opencv.core.Size;
 import org.opencv.highgui.Highgui;
 import org.opencv.imgproc.Imgproc;
 
@@ -53,6 +55,20 @@ public class GrayImage extends Image {
         return new GrayImage(new Mat());
     }
 
+    public static GrayImage maskBlockAll(Size size) {
+        GrayImage show = new GrayImage(new Mat(size, CvType.CV_8UC1));
+        show.image.setTo(new Scalar(0));
+
+        return show;
+    }
+
+    public static GrayImage maskShowAll(Size size) {
+        GrayImage show = new GrayImage(new Mat(size, CvType.CV_8UC1));
+        show.image.setTo(new Scalar(255));
+
+        return show;
+    }
+
     /// ======================================================================
     /// Image Manipulation
     /// ======================================================================
@@ -63,6 +79,24 @@ public class GrayImage extends Image {
         int rows = numberPixels / columns;
         image = new Mat(rows, columns, CvType.CV_8UC1);
         image.put(0, 0, pixels);
+    }
+
+    /**
+     * Filters the mask with a morphological filter of the specified type and size.
+     *
+     * All filters are done with an ellipse shaped template.
+     *
+     * Filter strength is the same as the size of the template in pixels.
+     * Values in the range of 3-20 are typical.
+     *
+     * @param morphType         type of filter to use
+     * @param strength          strength of filter
+     */
+    public void morphologicalFilter(MorphType morphType, double strength) {
+        Mat kernel = Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(strength, strength));
+        Imgproc.morphologyEx(image, image, morphType.type(), kernel);
+
+        kernel.release();
     }
 
     /// ======================================================================
@@ -76,55 +110,43 @@ public class GrayImage extends Image {
     }
 
     /**
-     * Returns a {@link Mask} of this image. Any pixels below the threshold value
+     * Returns a masked form of this image. Any pixels below the threshold value
      * are treated as block (black), and above as show (white).
      *
      * @param threshold     value below which pixels are blocked in the mask
-     * @return              mask
      */
-    public Mask toMask(int threshold) {
-        Mat mask = new Mat();
-        Imgproc.threshold(image, mask, threshold, 255, Imgproc.THRESH_BINARY);
-        return new Mask(mask);
+    public void threshold(int threshold) {
+        Imgproc.threshold(image, image, threshold, 255, Imgproc.THRESH_BINARY);
     }
 
     /**
-     * Returns a {@link Mask} of this image where blocked pixels are those
+     * Returns a masked form of this image where blocked pixels are those
      * that are relatively lower to their neighbors by approximately
      * relativeDifference in value.
      *
      * @param relativeDifference    approx difference between a pixel and its neighbors to be masked
-     * @return                      mask
      */
-    public Mask toMaskRelative(int relativeDifference) {
-        Mat mask = new Mat();
-        Imgproc.adaptiveThreshold(image, mask, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 10, relativeDifference);
-        return new Mask(mask);
+    public void relativeThreshold(int relativeDifference) {
+        Imgproc.adaptiveThreshold(image, image, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 10, relativeDifference);
     }
 
     /**
-     * Returns a {@link Mask} of this image where an automatic algorithm
+     * Returns a masked form of this image where an automatic algorithm
      * attempts to determine which pixels are background and which are foreground.
      * In the resulting mask, background pixels are blocked, foreground pixels are shown.
      *
      * Uses Otsu's method of histogram analysis.
-     *
-     * @return      mask
      */
-    public Mask toMaskAutomatic() {
-        Mat mask = new Mat();
-        Imgproc.threshold(image, mask, 1, 255, Imgproc.THRESH_BINARY | Imgproc.THRESH_OTSU);
-        return new Mask(mask);
+    public void toMaskAutomatic() {
+        Imgproc.threshold(image, image, 1, 255, Imgproc.THRESH_BINARY | Imgproc.THRESH_OTSU);
     }
 
     /**
-     * Returns a {@link Mask} of this image. Any non-black pixels are treated
+     * Returns a masked form of this image. Any non-black pixels are treated
      * as show (white), and black pixels as block (black).
-     *
-     * @return              mask of this image
      */
-    public Mask toMask() {
-        return toMask(1);
+    public void threshold() {
+        threshold(1);
     }
 
     /// ======================================================================

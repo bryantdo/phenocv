@@ -2,7 +2,7 @@ package src.ddpsc.phenocv.utility;
 
 import src.ddpsc.phenocv.computer_vision.Channel;
 import src.ddpsc.phenocv.computer_vision.ColorImage;
-import src.ddpsc.phenocv.computer_vision.Mask;
+import src.ddpsc.phenocv.computer_vision.GrayImage;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,17 +12,17 @@ import java.util.List;
  */
 public class Lists {
 
-    public static List<Tuple<ColorImage, Mask>> loadMaskedImagePairs(List<Tuple<String, String>> pairedFiles) {
+    public static List<Tuple<ColorImage, GrayImage>> loadMaskedImagePairs(List<Tuple<String, String>> pairedFiles) {
 
-        List<Tuple<ColorImage, Mask>> pairs = new ArrayList<Tuple<ColorImage, Mask>>();
+        List<Tuple<ColorImage, GrayImage>> pairs = new ArrayList<Tuple<ColorImage, GrayImage>>();
         for(Tuple<String, String> filenames : pairedFiles) {
             String imageFilename = filenames.item1;
             String maskFilename = filenames.item2;
 
             ColorImage image = new ColorImage(imageFilename);
-            Mask mask = new Mask(maskFilename);
+            GrayImage mask = new GrayImage(maskFilename);
 
-            pairs.add(new Tuple<ColorImage, Mask>(image, mask));
+            pairs.add(new Tuple<ColorImage, GrayImage>(image, mask));
         }
 
         return pairs;
