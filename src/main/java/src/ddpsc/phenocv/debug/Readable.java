@@ -59,6 +59,14 @@ public class Readable {
         return type;
     }
 
+    public static String matrix(Mat m) {
+        return "Matrix:"
+            + "\nTotal:" + m.total()
+            + "\nType:" + Readable.type(m.type())
+            + "\nSize:" + m.size()
+            + "\nChannels:" + m.channels();
+    }
+
     /**
      * Displays a BGR openCV color pixel in a human readable format
      *

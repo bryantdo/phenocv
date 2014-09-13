@@ -12,11 +12,8 @@ import java.util.List;
  */
 public class ShapeListFactory extends ReversableObjectFactory<List<Shape>, ShapeCollection> implements Releasable{
 
-    private ShapeCollection shapeCollection;
-
-    public ShapeListFactory(ShapeCollection shapeCollection) {
+    public ShapeListFactory() {
         super();
-        this.shapeCollection = shapeCollection;
     }
 
     @Override

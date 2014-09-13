@@ -3,6 +3,8 @@ package src.ddpsc.phenocv.computer_vision;
 import org.opencv.core.*;
 import org.opencv.highgui.Highgui;
 import org.opencv.imgproc.Imgproc;
+import src.ddpsc.phenocv.debug.*;
+import src.ddpsc.phenocv.debug.Readable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -84,6 +86,10 @@ public class Shape implements Writable, Releasable {
 
     public GrayImage imageMask(Size imageSize) {
         Mat mask = new Mat(imageSize, CvType.CV_8UC1);
+        mask.setTo(ShapeImageFactory.BLACK); // initialization isn't wholly black, it has noise
+        // I know you think this line is unnecessary and wasteful but you're wrong, trust me. Don't delete it
+        // Otherwise you'll get weird noise in the image for no apparent reason
+
         Mat subMask = mask.submat(boundingBox()); // does not need release, shallow copy
         Mat shape = toBinaryMatrix(); // references factory-built field, do not release
 
@@ -117,10 +123,7 @@ public class Shape implements Writable, Releasable {
     }
 
     Mat hierarchy() {
-        if (innerContours.size() == 0)
-            return new Mat(new Size(0, 4), CvType.CV_32SC4);
-
-        Mat hierarchy = new Mat(new Size(innerContours.size() + 1, 4), CvType.CV_32SC4);
+        Mat hierarchy = new Mat(new Size(1, innerContours.size() + 1), CvType.CV_32SC4);
         // 4 entries per relation, entry values:
         //      next, previous, first child, parent
         int relations[] = new int[4*(innerContours.size() + 1)];
@@ -151,8 +154,8 @@ public class Shape implements Writable, Releasable {
             relations[4*i + 6] = -1; // no children
             relations[4*i + 7] =  0; // parent is first row
         }
-
         hierarchy.put(0, 0, relations);
+
         return hierarchy;
     }
 
@@ -188,13 +191,6 @@ public class Shape implements Writable, Releasable {
 
     private Point topLeft() {
         return boundingBox().tl();
-    }
-
-    List<MatOfPoint> contourList() {
-        List<MatOfPoint> contourList = new ArrayList<MatOfPoint>();
-        contourList.add(outerContour);
-        contourList.addAll(innerContours);
-        return contourList;
     }
 
     private Mat toBinaryMatrix() {

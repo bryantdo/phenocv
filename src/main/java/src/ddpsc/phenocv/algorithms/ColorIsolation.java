@@ -5,6 +5,7 @@ import src.ddpsc.phenocv.computer_vision.*;
 import src.ddpsc.phenocv.utility.Lists;
 import src.ddpsc.phenocv.utility.Tuple;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -65,21 +66,20 @@ public class ColorIsolation implements Releasable {
         GrayImage mask = (GrayImage) backProjection.copy();
         mask.threshold();
 
-        mask.medianFilter(15);
-        /*ShapeCollection shapes = ShapeCollection.FromImage(mask);
+        mask.medianFilter(5);
+        ShapeCollection shapes = ShapeCollection.FromImage(mask);
         List<Shape> allShapes = shapes.shapes();
         List<Shape> keepShapes = new ArrayList<Shape>();
 
-        int i = 0;
         for (Shape shape : allShapes) {
-            System.out.println(i++);
             ColorPixel averagePixel = shape.averagePixelOf(image);
+
             if (averagePixel.isGreen())
                 keepShapes.add(shape);
         }
 
-        ShapeCollection keptShapes = new ShapeCollection(keepShapes);
-        GrayImage shapesMask = keptShapes.mask(image.size());*/
+        //ShapeCollection keptShapes = new ShapeCollection(keepShapes);
+        //GrayImage shapesMask = keptShapes.mask(image.size());
 
         ColorImage copy = (ColorImage) image.copy();
         copy.maskWith(mask);
@@ -87,7 +87,8 @@ public class ColorIsolation implements Releasable {
         mask.release();
         //shapesMask.release();
 
-        return new Tuple<GrayImage, ColorImage>(backProjection, copy);
+        backProjection.release();
+        return new Tuple<GrayImage, ColorImage>(shapes.grayImage(image.size()), copy);
     }
 
 

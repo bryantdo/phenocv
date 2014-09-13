@@ -3,10 +3,7 @@ package test.ddpsc.phenocv.algorithms_test;
 import org.junit.Test;
 import org.opencv.core.Core;
 import src.ddpsc.phenocv.algorithms.ColorIsolation;
-import src.ddpsc.phenocv.computer_vision.HistogramPartition;
-import src.ddpsc.phenocv.computer_vision.ColorImage;
-import src.ddpsc.phenocv.computer_vision.GrayImage;
-import src.ddpsc.phenocv.computer_vision.ReleaseContainer;
+import src.ddpsc.phenocv.computer_vision.*;
 import src.ddpsc.phenocv.utility.Lists;
 import src.ddpsc.phenocv.utility.PerformanceTimer;
 import src.ddpsc.phenocv.utility.Tuple;
@@ -55,7 +52,10 @@ public class ColorIsolationTest {
         List<Tuple<ColorImage, GrayImage>> trainingPairs = Lists.loadMaskedImagePairs(trainingFiles);
         List<ColorImage> testImages = getTestImages();
 
-        HistogramPartition[] histogramPartitions = HistogramPartition.values(100);
+        //HistogramPartition[] histogramPartitions = HistogramPartition.values(100);
+        HistogramPartition[] histogramPartitions = new HistogramPartition[] {
+                new HistogramPartition(ColorSpace.HSV, 100),
+                new HistogramPartition(ColorSpace.HLS, 100)};
 
         for (HistogramPartition histogramPartition : histogramPartitions) {
 

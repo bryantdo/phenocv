@@ -16,6 +16,12 @@ public class TestFiles {
     public final static String TEST_RESULT_ROOT = "C:\\Development\\DDPSC\\PhenoCV\\resources\\images\\computer vision test results\\";
     public final static String ARTIFICIAL_ROOT = "C:\\Development\\DDPSC\\PhenoCV\\resources\\images\\computer vision training\\";
 
+    public final static String SUBSHAPES_NAME = "many shapes.png";
+    public final static String SUBSHAPES = ARTIFICIAL_ROOT + SUBSHAPES_NAME;
+
+    public final static String SHAPES_NAME = "simple shape.png";
+    public final static String SHAPES = ARTIFICIAL_ROOT + SHAPES_NAME;
+
     public final static String LARGE_GRADIENT_NAME = "large gradient.png";
     public final static String LARGE_GRADIENT = ARTIFICIAL_ROOT + LARGE_GRADIENT_NAME;
 

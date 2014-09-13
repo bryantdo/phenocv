@@ -28,6 +28,9 @@ public abstract class Image implements Writable, Releasable {
 
     protected Image(int width, int height, int colorType) {
         image = new Mat(height, width, colorType);
+        image.setTo(ShapeImageFactory.BLACK); // initialization isn't wholly black, it has noise
+        // I know you think this line is unnecessary and wasteful but you're wrong, trust me. Don't delete it
+        // Otherwise you'll get weird noise in the image for no apparent reason
     }
 
     protected Image(String filename, int imageType) {

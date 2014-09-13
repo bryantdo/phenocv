@@ -15,7 +15,7 @@ public class ShapeImageFactory extends ReversableObjectFactory<Mat, Shape> imple
 
     // Display settings for drawing the shape onto a mask
     static final int DRAW_ALL = -1;
-    static final int FILL_AREA = 0;
+    static final int FILL_AREA = -1;
     static final int SOLID_PERIMETER = 8;
     static final int DRAW_ALL_CHILDREN = 2;
     static final Scalar BLACK = new Scalar(0);
@@ -39,12 +39,15 @@ public class ShapeImageFactory extends ReversableObjectFactory<Mat, Shape> imple
         Point topLeft = boundingRect.tl();
         Point offset = new Point(-topLeft.x, -topLeft.y);
 
-        Mat shapeImage = new Mat(shape.boundingBox().size(), CvType.CV_8U);
+        Mat shapeImage = new Mat(shape.boundingBox().size(), CvType.CV_8UC1);
+
+        shapeImage.setTo(BLACK); // initialization isn't wholly black, it has noise
+        // I know you think this line is unnecessary and wasteful but you're wrong, trust me. Don't delete it
+        // Otherwise you'll get weird noise in the image for no apparent reason
+
         Mat shapeHierarchy = shape.hierarchy();
 
         final int allContours = -1;
-        System.out.println(shapeHierarchy.total());
-        System.out.println(Readable.type(shapeHierarchy.type()));
         Imgproc.drawContours(
                 shapeImage,
                 this.shape.contours(),
@@ -52,7 +55,7 @@ public class ShapeImageFactory extends ReversableObjectFactory<Mat, Shape> imple
                 WHITE,
                 FILL_AREA,
                 SOLID_PERIMETER,
-                shapeHierarchy,
+                new Mat(),
                 DRAW_ALL_CHILDREN,
                 offset);
 

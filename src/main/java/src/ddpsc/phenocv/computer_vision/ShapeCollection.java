@@ -30,7 +30,11 @@ public class ShapeCollection implements Writable, Releasable {
     /// Constructors
     /// ======================================================================
     public ShapeCollection(List<Shape> shapes) {
+        shapesList = new ShapeListFactory();
+        shapesImage = new ShapeCollectionImageFactory();
+
         shapesList.setFrom(shapes);
+
         hierarchy = null;
         contours = null;
     }
@@ -38,11 +42,12 @@ public class ShapeCollection implements Writable, Releasable {
     ShapeCollection(List<MatOfPoint> contours, Mat hierarchy) {
         this.contours = contours;
         this.hierarchy = hierarchy;
-        shapesImage = new ShapeCollectionImageFactory(this);
-        shapesList = new ShapeListFactory(this);
+        shapesImage = new ShapeCollectionImageFactory();
+        shapesList = new ShapeListFactory();
     }
 
     public static ShapeCollection FromImage(GrayImage image) {
+
         List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
         Mat hierarchy = new Mat();
         Imgproc.findContours(image.image, contours, hierarchy, Imgproc.RETR_CCOMP, Imgproc.CHAIN_APPROX_SIMPLE);
@@ -58,9 +63,10 @@ public class ShapeCollection implements Writable, Releasable {
     }
 
     public Rect boundingBox() {
-        if (contours == null)
-            if (! shapesList.calculated())
+        if (contours == null) {
+            if (! shapesList.calculated() || shapes().size() == 0)
                 return new Rect();
+        }
         else if (contours.size() == 0)
             return new Rect();
 
@@ -87,6 +93,10 @@ public class ShapeCollection implements Writable, Releasable {
 
     public GrayImage grayImage(Size imageSize) {
         Mat image = new Mat(imageSize, CvType.CV_8UC1);
+        image.setTo(ShapeImageFactory.BLACK); // initialization isn't wholly black, it has noise
+        // I know you think this line is unnecessary and wasteful but you're wrong, trust me. Don't delete it
+        // Otherwise you'll get weird noise in the image for no apparent reason
+
         Mat subImage = image.submat(boundingBox()); // shallow copy, do not release
         Mat shape = toGrayMatrix(); // references factory field, do not release
 
