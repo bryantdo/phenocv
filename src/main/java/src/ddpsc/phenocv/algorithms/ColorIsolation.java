@@ -13,6 +13,8 @@ import java.util.List;
  */
 public class ColorIsolation implements Releasable {
 
+    private static final int MEDIAN_STRENGTH = 5;
+
     boolean trained = false;
     HistogramPartition histogramPartition;
     Histogram histogram;
@@ -40,55 +42,72 @@ public class ColorIsolation implements Releasable {
         train(Lists.loadMaskedImagePairs(trainingFiles));
     }
 
-    public ColorImage isolate(ColorImage image) {
+    public void fastIsolation(ColorImage image) {
         if (trained == false)
-            return image;
+            return;
 
         else {
-            Tuple<GrayImage, ColorImage> isolation = __doIsolate(image);
-            isolation.item1.release();
-            return isolation.item2;
+            GrayImage backProjection = histogram.backProjectionOf(image);
+            GrayImage mask = (GrayImage) backProjection.copy();
+
+            mask.threshold();
+            mask.medianFilter(MEDIAN_STRENGTH);
+
+            ShapeCollection shapes = ShapeCollection.FromImage(mask);
+            List<Shape> allShapes = shapes.shapes();
+            List<Shape> keepShapes = new ArrayList<Shape>();
+
+            for (Shape shape : allShapes) {
+                ColorPixel averagePixel = shape.averagePixelOf(image);
+
+                if (shape.numberPixels() > 250 && averagePixel.isGreen())
+                    keepShapes.add(shape);
+            }
+
+            ShapeCollection keptShapes = new ShapeCollection(keepShapes);
+            GrayImage shapesMask = keptShapes.mask(image.size());
+
+            image.maskWith(shapesMask);
+
+            backProjection.release();
+            mask.release();
+            shapesMask.release();
         }
     }
 
-    public Tuple<GrayImage, ColorImage> detailedIsolation(ColorImage image) {
+    public Tuple<Image, ColorImage> debugIsolation(ColorImage image) {
         if (trained == false)
-            return new Tuple<GrayImage, ColorImage>(GrayImage.empty(), image);
+            return new Tuple<Image, ColorImage>(GrayImage.empty(), image);
 
         else {
-            return __doIsolate(image);
+            GrayImage backProjection = histogram.backProjectionOf(image);
+            GrayImage mask = (GrayImage) backProjection.copy();
+            mask.threshold();
+
+            mask.medianFilter(MEDIAN_STRENGTH);
+            ShapeCollection shapes = ShapeCollection.FromImage(mask);
+            List<Shape> allShapes = shapes.shapes();
+            List<Shape> keepShapes = new ArrayList<Shape>();
+
+            for (Shape shape : allShapes) {
+                ColorPixel averagePixel = shape.averagePixelOf(image);
+
+                if (shape.numberPixels() > 250 && averagePixel.isGreen())
+                    keepShapes.add(shape);
+            }
+
+            ShapeCollection keptShapes = new ShapeCollection(keepShapes);
+            GrayImage shapesMask = keptShapes.mask(image.size());
+
+            ColorImage copy = (ColorImage) image.copy();
+            copy.maskWith(shapesMask);
+
+            mask.release();
+            shapesMask.release();
+            backProjection.release();
+
+            return new Tuple<Image, ColorImage>(shapes.maskWithAverageValues(image), copy);
         }
-    }
-
-    private Tuple<GrayImage, ColorImage> __doIsolate(ColorImage image) {
-
-        GrayImage backProjection = histogram.backProjectionOf(image);
-        GrayImage mask = (GrayImage) backProjection.copy();
-        mask.threshold();
-
-        mask.medianFilter(5);
-        ShapeCollection shapes = ShapeCollection.FromImage(mask);
-        List<Shape> allShapes = shapes.shapes();
-        List<Shape> keepShapes = new ArrayList<Shape>();
-
-        for (Shape shape : allShapes) {
-            ColorPixel averagePixel = shape.averagePixelOf(image);
-
-            if (averagePixel.isGreen())
-                keepShapes.add(shape);
-        }
-
-        //ShapeCollection keptShapes = new ShapeCollection(keepShapes);
-        //GrayImage shapesMask = keptShapes.mask(image.size());
-
-        ColorImage copy = (ColorImage) image.copy();
-        copy.maskWith(mask);
-
-        mask.release();
-        //shapesMask.release();
-
-        backProjection.release();
-        return new Tuple<GrayImage, ColorImage>(shapes.grayImage(image.size()), copy);
     }
 
 
@@ -98,5 +117,6 @@ public class ColorIsolation implements Releasable {
     @Override
     public void release() {
         histogram.release();
+        trained = false;
     }
 }

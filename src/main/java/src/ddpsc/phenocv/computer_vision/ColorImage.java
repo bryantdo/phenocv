@@ -2,6 +2,7 @@ package src.ddpsc.phenocv.computer_vision;
 
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.Size;
 import org.opencv.highgui.Highgui;
 import org.opencv.imgproc.Imgproc;
 
@@ -41,21 +42,6 @@ public class ColorImage extends Image {
     }
 
     /**
-     * Creates an all black color-formatted image of the supplied dimensions.
-     *
-     * width is number of columns, height is number of rows
-     *
-     * @see GrayImage
-     *
-     * @param width     width of the image
-     * @param height    height of the image
-     */
-    public ColorImage(int width, int height) {
-        super(width, height, CvType.CV_8UC3);
-        _init();
-    }
-
-    /**
      * Creates a color-formatted image of the file at the supplied file destination.
      *
      * If the image is grayscale, it will be stored as a color image.
@@ -67,6 +53,33 @@ public class ColorImage extends Image {
     public ColorImage(String filename) {
         super(filename, Highgui.CV_LOAD_IMAGE_COLOR);
         _init();
+    }
+
+    /**
+     * Creates a new color image of the supplied dimensions and with every pixel
+     * the same color as the supplied {@link ColorPixel}.
+     *
+     * @param width     width of image
+     * @param height    height of image
+     * @param color     color of every pixel in image
+     */
+    public ColorImage(int width, int height, ColorPixel color) {
+        super(width, height, CvType.CV_8UC3);
+        _init();
+
+        image.setTo(color.scalar());
+    }
+
+    public ColorImage(Size size, ColorPixel color) {
+        this((int)size.width, (int)size.height, color);
+    }
+
+    public ColorImage(Size size) {
+        this((int)size.width, (int)size.height, ColorPixel.BLACK);
+    }
+
+    public ColorImage(int width, int height) {
+        this(width, height, ColorPixel.BLACK);
     }
 
     /**

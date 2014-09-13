@@ -19,6 +19,7 @@ public class ShapeCollectionImageFactory extends ReversableObjectFactory<Mat, Sh
     @Override
     public void release() {
         calculatedObject.release();
+        calculatedObject = null;
     }
 
     @Override
@@ -28,7 +29,7 @@ public class ShapeCollectionImageFactory extends ReversableObjectFactory<Mat, Sh
         Point offset = new Point(-topLeft.x, -topLeft.y);
 
         List<Shape> shapes = shapeCollection.shapes(); // references field, do not release
-        Mat shapesImage = new Mat(shapeCollection.boundingBox().size(), CvType.CV_8UC1);
+        Mat shapesImage = new Mat(boundingRect.size(), CvType.CV_8UC1);
 
         shapesImage.setTo(ShapeImageFactory.BLACK); // initialization isn't wholly black, it has noise
         // I know you think this line is unnecessary and wasteful but you're wrong, trust me. Don't delete it

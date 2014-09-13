@@ -3,7 +3,7 @@ package src.ddpsc.phenocv.utility;
 /**
  * @author cjmcentee
  */
-public class Conversion {
+public class Convert {
 
 
     /**
@@ -15,11 +15,15 @@ public class Conversion {
      * @param bytes     byte array to convert
      * @return          input byte array as ints
      */
-    public static int[] toInt(byte bytes[]) {
+    public static int[] toIntArray(byte bytes[]) {
         int ints[] = new int[bytes.length];
         for (int i = 0; i < bytes.length; i++)
-            ints[i] = bytes[i] & 0xff;
+            ints[i] = toInt(bytes[i]);
         return ints;
+    }
+
+    public static int toInt(byte b) {
+        return b & 0xff;
     }
 
 }

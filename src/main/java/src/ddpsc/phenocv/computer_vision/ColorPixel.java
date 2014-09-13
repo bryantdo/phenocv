@@ -1,18 +1,11 @@
 package src.ddpsc.phenocv.computer_vision;
 
-import org.opencv.core.CvType;
-import org.opencv.core.Mat;
 import org.opencv.core.Scalar;
-import org.opencv.core.Size;
-import org.opencv.imgproc.Imgproc;
+import src.ddpsc.phenocv.utility.Convert;
+import src.ddpsc.phenocv.utility.MathX;
 
 /**
- * Represents a colored pixel of an image.
- *
- * Can be converted to various channels, though only BGR <-> HSV are currently implemented.
- *
- * By default the pixel is in the BGR channel. The RGB channel is not available.
- * So bear in mind that {@link ColorPixel#channel1} is BLUE in BGR, not RED.
+ * Represents a colored pixel of an image in the BGR range.
  *
  * Wraps the OpenCV {@link Scalar} "class".
  *
@@ -20,59 +13,55 @@ import org.opencv.imgproc.Imgproc;
  */
 public class ColorPixel {
 
+    public static final ColorPixel BLACK = new ColorPixel(0, 0, 0);
 
-    static final private int RED_HUE        = 0/2;
-    static final private int YELLOW_HUE     = 60/2;
-    static final private int GREEN_HUE      = 120/2;
-    static final private int CYAN_HUE       = 180/2;
-    static final private int BLUE_HUE       = 240/2;
-    static final private int MAGENTA_HUE    = 300/2;
+    static final private int RED_HUE        = 0;
+    static final private int YELLOW_HUE     = 30;
+    static final private int GREEN_HUE      = 60;
+    static final private int CYAN_HUE       = 90;
+    static final private int BLUE_HUE       = 120;
+    static final private int MAGENTA_HUE    = 150;
 
-
-    final public ColorSpace colorSpace;
-    final public int channel1, channel2, channel3;
+    final public int blue, green, red;
 
     /// ======================================================================
     /// Constructors
     /// ======================================================================
     public ColorPixel() {
-        this(0, 0, 0, ColorSpace.BGR);
+        this(0, 0, 0);
     }
 
-    public ColorPixel(int channel1, int channel2, int channel3) {
-        this(channel1, channel2, channel3, ColorSpace.BGR);
+    private ColorPixel(int blue, int green, int red) {
+        this.blue = blue;
+        this.green = green;
+        this.red = red;
     }
 
-    public ColorPixel(int channel1, int channel2, int channel3, ColorSpace colorSpace) {
-        this.channel1 = channel1;
-        this.channel2 = channel2;
-        this.channel3 = channel3;
-        this.colorSpace = colorSpace;
+    public static ColorPixel fromInt(int blue, int green, int red) {
+        return new ColorPixel(blue, green, red);
+    }
+
+    public static ColorPixel fromByte(byte blue, byte green, byte red) {
+        return new ColorPixel(Convert.toInt(blue), Convert.toInt(green), Convert.toInt(red));
     }
 
     ColorPixel(Scalar scalarColor) {
-        this(scalarColor, ColorSpace.BGR);
-    }
-
-    ColorPixel(Scalar scalarColor, ColorSpace colorSpace) {
         double channels[] = scalarColor.val;
 
         if (channels.length > 0)
-            channel1 = (int) channels[0];
+            blue = (int) channels[0];
         else
-            channel1 = 0;
+            blue = 0;
 
         if (channels.length > 1)
-            channel2 = (int) channels[1];
+            green = (int) channels[1];
         else
-            channel2 = 0;
+            green = 0;
 
         if (channels.length > 2)
-            channel3 = (int) channels[2];
+            red = (int) channels[2];
         else
-            channel3 = 0;
-
-        this.colorSpace = colorSpace;
+            red = 0;
     }
 
 
@@ -80,55 +69,46 @@ public class ColorPixel {
     /// Properties
     /// ======================================================================
     public boolean isGreen() {
-        ColorPixel hsv = HSV();
-        int hue = hsv.channel1;
+        int hue = hue();
 
-        return hue < CYAN_HUE && hue > YELLOW_HUE;
+        return hue < CYAN_HUE - 10 && hue > YELLOW_HUE + 10;
+    }
+
+    @Override
+    public String toString() {
+        return "(" + blue + ", " + green + ", " + red + ")";
     }
 
 
     /// ======================================================================
     /// Conversion
     /// ======================================================================
-    /**
-     * Converts this pixel to BGR.
-     *
-     * Data type ranges are:
-     *      BLUE            [0, 256)
-     *      GREEN           [0, 256)
-     *      RED             [0, 256)
-     *
-     * @return      BGR formatted pixel
-     */
-    public ColorPixel BGR() {
-        return convert(ColorSpace.BGR);
+
+    Scalar scalar() {
+        return new Scalar(blue, green, red);
     }
 
-    /**
-     * Converts this pixel to HSV.
-     *
-     * Data type ranges are:
-     *      HUE             [0, 180)
-     *      SATURATION      [0, 256)
-     *      VALUE           [0, 256)
-     *
-     * @return      HSV formatted pixel
-     */
-    public ColorPixel HSV() {
-        return convert(ColorSpace.HSV);
-    }
+    public int hue() {
+        int min = MathX.min(red, green, blue);
+        int max = MathX.max(red, green, blue);
+        double delta = max - min;
 
-    ColorPixel convert(ColorSpace newColorSpace) {
-        if (colorSpace == newColorSpace)
-            return this;
+        if(max == 0) // black
+            return -1;
 
-        Mat singlePixel = new Mat(new Size(1, 1), CvType.CV_8UC3);
-        Mat convertedPixel = new Mat(new Size(1, 1), CvType.CV_8UC3);
-        Imgproc.cvtColor(singlePixel, convertedPixel, ColorSpace.convertCode(colorSpace, newColorSpace));
+        double hue;
+        if(red == max)
+            hue = (green - blue) / delta; // between yellow & magenta
+        else if(green == max)
+            hue = 2 + (blue - red) / delta;  // between cyan & yellow
+        else
+            hue = 4 + (red - green) / delta;  // between magenta & cyan
 
-        byte pixel[] = new byte[3];
-        convertedPixel.get(0, 0, pixel);
+        hue *= 60.0; // degrees
 
-        return new ColorPixel(pixel[0], pixel[1], pixel[2], newColorSpace);
+        if(hue < 0) // in range 0 - 360
+            hue += 360.0;
+
+        return (int) (hue / 2); // in range 0 - 180 (openCV convention for 8bit depth images)
     }
 }

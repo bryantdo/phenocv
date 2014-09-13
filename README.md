@@ -57,3 +57,8 @@ Be warned, some of the tests output hundreds of megabytes of data. Particularly 
 
 ###Run
 Not implemented. Currently there is no entry point to the application, only the JUnit tests.
+
+###License
+Licensed under GNU-GPL v3.0. (http://www.gnu.org/copyleft/gpl.html)
+
+The full license can be found in license.txt.

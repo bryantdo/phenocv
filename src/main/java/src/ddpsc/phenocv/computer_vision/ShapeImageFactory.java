@@ -31,6 +31,7 @@ public class ShapeImageFactory extends ReversableObjectFactory<Mat, Shape> imple
     @Override
     public void release() {
        calculatedObject.release();
+       calculatedObject = null;
     }
 
     @Override

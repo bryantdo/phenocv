@@ -14,27 +14,30 @@ public class TestFiles {
 
     public final static String PLANT_ROOT = "C:\\Development\\DDPSC\\PhenoCV\\resources\\images\\";
     public final static String TEST_RESULT_ROOT = "C:\\Development\\DDPSC\\PhenoCV\\resources\\images\\computer vision test results\\";
-    public final static String ARTIFICIAL_ROOT = "C:\\Development\\DDPSC\\PhenoCV\\resources\\images\\computer vision training\\";
+    public final static String TEST_SOURCE_ROOT = "C:\\Development\\DDPSC\\PhenoCV\\resources\\images\\computer vision training\\";
+
+    public final static String RAINBOW_NAME = "rainbow.png";
+    public final static String RAINBOW = TEST_SOURCE_ROOT + RAINBOW_NAME;
 
     public final static String SUBSHAPES_NAME = "many shapes.png";
-    public final static String SUBSHAPES = ARTIFICIAL_ROOT + SUBSHAPES_NAME;
+    public final static String SUBSHAPES = TEST_SOURCE_ROOT + SUBSHAPES_NAME;
 
-    public final static String SHAPES_NAME = "simple shape.png";
-    public final static String SHAPES = ARTIFICIAL_ROOT + SHAPES_NAME;
+    public final static String SHAPE_NAME = "simple shape.png";
+    public final static String SHAPE = TEST_SOURCE_ROOT + SHAPE_NAME;
 
     public final static String LARGE_GRADIENT_NAME = "large gradient.png";
-    public final static String LARGE_GRADIENT = ARTIFICIAL_ROOT + LARGE_GRADIENT_NAME;
+    public final static String LARGE_GRADIENT = TEST_SOURCE_ROOT + LARGE_GRADIENT_NAME;
 
     public final static String GRADIENT_NAME = "gradient.png";
-    public final static String GRADIENT = ARTIFICIAL_ROOT + GRADIENT_NAME;
+    public final static String GRADIENT = TEST_SOURCE_ROOT + GRADIENT_NAME;
 
     public final static String GRADIENT_GREENSPOT_NAME = "gradient with green spot.png";
-    public final static String GRADIENT_GREENSPOT = ARTIFICIAL_ROOT + GRADIENT_GREENSPOT_NAME;
+    public final static String GRADIENT_GREENSPOT = TEST_SOURCE_ROOT + GRADIENT_GREENSPOT_NAME;
 
     public final static String GRADIENT_MASK_NAME = "gradient mask.png";
-    public final static String GRADIENT_MASK = ARTIFICIAL_ROOT + GRADIENT_MASK_NAME;
+    public final static String GRADIENT_MASK = TEST_SOURCE_ROOT + GRADIENT_MASK_NAME;
 
-    public final static String TINY_TEST = ARTIFICIAL_ROOT + "tiny test image.png";
+    public final static String TINY_TEST = TEST_SOURCE_ROOT + "tiny test image.png";
     public final static byte TINY_PIXELS_BGR[] =
             new byte[] {// BLUE   GREEN     RED
                     (byte)255, (byte)255, (byte)255, // white to black

@@ -48,6 +48,10 @@ public class GrayImage extends Image {
         super(width, height, CvType.CV_8UC1);
     }
 
+    public GrayImage(Size size) {
+        this((int) size.width, (int) size.height);
+    }
+
     /**
      * Creates a grayscale-formatted image of the file at the supplied file destination.
      *

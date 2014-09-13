@@ -64,13 +64,25 @@ public class ColorIsolationTest {
             colorIsolation.train(trainingPairs);
             for (int i = 0; i < testImages.size(); i++) {
                 ColorImage image = testImages.get(i);
+                ColorImage copy = (ColorImage) image.copy();
 
                 PerformanceTimer.start();
-                //ColorImage isolatedImage = colorIsolation.isolate(testImages.get(i));
-                Tuple<GrayImage, ColorImage> isolationData = colorIsolation.detailedIsolation(image);
+                colorIsolation.fastIsolation(copy);
                 PerformanceTimer.end();
 
-                String backProjectionSaveName =
+                /*String originalSaveName =
+                        RESULTS_ROOT + histogramPartition.toString() + " "
+                                + TEST_PREFIX + i + RESULTS_SUFFIX
+                                + " original" + FILETYPE;
+                image.writeTo(originalSaveName);*/
+
+                String imageSaveName =
+                        RESULTS_ROOT + histogramPartition.toString() + " "
+                                + TEST_PREFIX + i + RESULTS_SUFFIX
+                                + FILETYPE;
+                copy.writeTo(imageSaveName);
+
+                /*String backProjectionSaveName =
                         RESULTS_ROOT + histogramPartition.toString() + " "
                                 + TEST_PREFIX + i + RESULTS_SUFFIX
                                 + " back projection" + FILETYPE;
@@ -82,7 +94,7 @@ public class ColorIsolationTest {
                                 + FILETYPE;
                 isolationData.item2.writeTo(imageSaveName);
 
-                ReleaseContainer.releaseBoth(isolationData);
+                ReleaseContainer.releaseBoth(isolationData);*/
             }
 
             colorIsolation.release();

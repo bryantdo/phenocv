@@ -80,8 +80,8 @@ public class ShapeCollection implements Writable, Releasable {
                     Math.max(shapeBox.br().x, bottomRight.x),
                     Math.max(shapeBox.br().y, bottomRight.y));
             topLeft = new Point(
-                    Math.min(shapeBox.br().x, topLeft.x),
-                    Math.min(shapeBox.br().y, topLeft.y));
+                    Math.min(shapeBox.tl().x, topLeft.x),
+                    Math.min(shapeBox.tl().y, topLeft.y));
         }
 
         return new Rect(bottomRight, topLeft);
@@ -110,6 +110,33 @@ public class ShapeCollection implements Writable, Releasable {
         image.threshold();
 
         return image;
+    }
+
+    public ColorImage maskWithAverageValues(ColorImage image) {
+        Mat shapesImage = new Mat(image.size(), CvType.CV_8UC3);
+
+        shapesImage.setTo(ShapeImageFactory.BLACK); // initialization isn't wholly black, it has noise
+        // I know you think this line is unnecessary and wasteful but you're wrong, trust me. Don't delete it
+        // Otherwise you'll get weird noise in the image for no apparent reason
+
+        List<Shape> shapes = shapes(); // references field, do not release
+        for (int i = 0; i < shapes.size(); i++) {
+            Shape shape = shapes.get(i);
+
+            ColorPixel color = shape.averagePixelOf(image);
+
+            Imgproc.drawContours(shapesImage,
+                    shape.contours(),
+                    ShapeImageFactory.DRAW_ALL,
+                    color.scalar(),
+                    ShapeImageFactory.FILL_AREA,
+                    ShapeImageFactory.SOLID_PERIMETER,
+                    new Mat(),
+                    ShapeImageFactory.DRAW_ALL_CHILDREN,
+                    new Point());
+        }
+
+        return new ColorImage(shapesImage);
     }
 
 
