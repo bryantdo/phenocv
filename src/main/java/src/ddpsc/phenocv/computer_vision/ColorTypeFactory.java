@@ -22,9 +22,10 @@ abstract class ColorTypeFactory extends ReversableObjectFactory<Mat, Mat> implem
 
     @Override
     protected Mat calculate(Mat seed) {
-        calculatedObject = new Mat();
-        Imgproc.cvtColor(seed, calculatedObject, cvConversionValue(), 3);
-        return calculatedObject;
+      System.out.println("is seed empty: " + seed.empty());
+      calculatedObject = new Mat();
+      Imgproc.cvtColor(seed, calculatedObject, cvConversionValue(), 3);
+      return calculatedObject;
     }
 
     protected abstract int cvConversionValue();

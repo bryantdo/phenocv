@@ -12,9 +12,9 @@ public class TestFiles {
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
     }
 
-    public final static String PLANT_ROOT = "C:\\Development\\DDPSC\\PhenoCV\\resources\\images\\";
-    public final static String TEST_RESULT_ROOT = "C:\\Development\\DDPSC\\PhenoCV\\resources\\images\\computer vision test results\\";
-    public final static String TEST_SOURCE_ROOT = "C:\\Development\\DDPSC\\PhenoCV\\resources\\images\\computer vision training\\";
+    public final static String PLANT_ROOT = "/Users/bryantd/IdeaProjects/phenocv/resources/images";
+    public final static String TEST_RESULT_ROOT = "/Users/bryantd/IdeaProjects/phenocv/resources/images/computer vision test results/";
+    public final static String TEST_SOURCE_ROOT = "/Users/bryantd/IdeaProjects/phenocv/resources/images/computer vision training/";
 
     public final static String RAINBOW_NAME = "rainbow.png";
     public final static String RAINBOW = TEST_SOURCE_ROOT + RAINBOW_NAME;

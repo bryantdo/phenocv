@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/PhenoCV.iml" filepath="$PROJECT_DIR$/PhenoCV.iml" />
+      <module fileurl="file://$PROJECT_DIR$/phenocv.iml" filepath="$PROJECT_DIR$/phenocv.iml" />
     </modules>
   </component>
 </project>

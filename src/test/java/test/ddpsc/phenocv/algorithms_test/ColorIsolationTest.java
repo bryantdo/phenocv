@@ -20,9 +20,9 @@ public class ColorIsolationTest {
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
     }
 
-    private static final String TRAIN_ROOT = "C:\\Development\\DDPSC\\PhenoCV\\resources\\images\\color isolation training\\";
-    private static final String TEST_ROOT = "C:\\Development\\DDPSC\\PhenoCV\\resources\\images\\color isolation test\\";
-    private static final String RESULTS_ROOT = "C:\\Development\\DDPSC\\PhenoCV\\resources\\images\\color isolation test\\results\\";
+    private static final String TRAIN_ROOT = "/Users/bryantd/IdeaProjects/phenocv/resources/images/color isolation training/";
+    private static final String TEST_ROOT = "/Users/bryantd/IdeaProjects/phenocv/resources/images/color isolation test/";
+    private static final String RESULTS_ROOT = "/Users/bryantd/IdeaProjects/phenocv/resources/images/color isolation test/results/";
 
     private static final String FILETYPE = ".png";
 

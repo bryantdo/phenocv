@@ -205,5 +205,3 @@ public class Shape implements Writable, Releasable {
         return innerContoursFloat.getFrom(innerContours);
     }
 }
-
-
