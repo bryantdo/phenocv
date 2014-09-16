@@ -4,7 +4,9 @@ import org.opencv.core.*;
 import org.opencv.highgui.Highgui;
 import org.opencv.imgproc.Imgproc;
 import src.ddpsc.phenocv.debug.Readable;
+import src.ddpsc.phenocv.utility.Directory;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,7 +36,12 @@ public abstract class Image implements Writable, Releasable {
     }
 
     protected Image(String filename, int imageType) {
-        image = Highgui.imread(filename, imageType);
+        File file = new File(filename);
+
+        if (file.exists())
+            image = Highgui.imread(filename, imageType);
+        else
+            System.out.println("File " + filename + " cannot be loaded as an image because it doesn't exist.");
     }
 
 
@@ -43,6 +50,8 @@ public abstract class Image implements Writable, Releasable {
     /// ======================================================================
     @Override
     public void writeTo(String filename) {
+        Directory.EnsurePathExistsFor(filename);
+
         if (image.channels() == 2) {
             Mat flatRed = new Mat(image.size(), CvType.CV_8UC1);
 

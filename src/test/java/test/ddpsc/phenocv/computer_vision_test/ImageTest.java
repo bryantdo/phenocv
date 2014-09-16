@@ -4,6 +4,7 @@ import org.junit.Test;
 import org.opencv.core.Core;
 import src.ddpsc.phenocv.computer_vision.ColorImage;
 import src.ddpsc.phenocv.computer_vision.GrayImage;
+import src.ddpsc.phenocv.utility.OpenCV;
 
 /**
  * Untested:
@@ -25,10 +26,10 @@ public class ImageTest {
 
     // Load openCV native library
     static {
-        System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+        OpenCV.Load();
     }
 
-    private final static String NAME_PREFIX = "Image Test ";
+    private final static String NAME_PREFIX = "Image_Test_";
 
     @Test
     public void TestMaskWithMask() {
@@ -38,7 +39,7 @@ public class ImageTest {
 
         image.maskWith(mask);
 
-        image.writeTo(TestFiles.TEST_RESULT_ROOT + NAME_PREFIX + "maskWith(Mask) mask application results.png");
+        image.writeTo(TestFiles.TEST_RESULT_ROOT + NAME_PREFIX + "maskWith(Mask)_mask_application_results.png");
     }
 
 }

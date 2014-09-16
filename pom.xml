@@ -9,8 +9,77 @@
     <groupId>com.ddpsc</groupId>
     <artifactId>phenocv</artifactId>
     <version>1.0</version>
+    <packaging>jar</packaging>
+
+    <!-- Where to get the OpenCV dependencies from -->
+    <repositories>
+        <repository>
+            <id>javaopencvbook</id>
+            <url>https://raw.github.com/JavaOpenCVBook/code/maven2/</url>
+        </repository>
+    </repositories>
+
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>2.4</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <addClasspath>true</addClasspath>
+                            <classpathPrefix>lib/</classpathPrefix>
+                            <!--<mainClass>com.mycompany.app.App</mainClass> We need a main class -->
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>2.1</version>
+                <executions>
+                    <execution>
+                        <id>copy-dependencies</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/lib</outputDirectory>
+                            <overWriteReleases>false</overWriteReleases>
+                            <overWriteSnapshots>false</overWriteSnapshots>
+                            <overWriteIfNewer>true</overWriteIfNewer>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>com.googlecode.mavennatives</groupId>
+                <artifactId>maven-nativedependencies-plugin</artifactId>
+                <version>0.0.7</version>
+                <executions>
+                    <execution>
+                        <id>unpacknatives</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
 
     <dependencies>
+
+        <!-- OpenCV -->
+        <dependency>
+            <groupId>nu.pattern</groupId>
+            <artifactId>opencv</artifactId>
+            <version>2.4.9-4</version>
+        </dependency>
 
         <!-- JUnit -->
         <dependency>

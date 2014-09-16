@@ -9,11 +9,16 @@ import src.ddpsc.phenocv.computer_vision.ColorPixel;
 import src.ddpsc.phenocv.computer_vision.ColorSpace;
 import src.ddpsc.phenocv.computer_vision.GrayImage;
 import src.ddpsc.phenocv.utility.Convert;
+import src.ddpsc.phenocv.utility.OpenCV;
 
 /**
  * @author cjmcentee
  */
 public class ColorPixelTest {
+
+    static {
+        OpenCV.Load();
+    }
 
     @Test
     public void TestIsGreen() {
@@ -38,6 +43,6 @@ public class ColorPixelTest {
         mask.setPixels(maskPixels, rainbow.width());
 
         rainbow.maskWith(mask);
-        rainbow.writeTo(TestFiles.TEST_RESULT_ROOT + "only green pixels.png");
+        rainbow.writeTo(TestFiles.TEST_RESULT_ROOT + "only_green_pixels.png");
     }
 }

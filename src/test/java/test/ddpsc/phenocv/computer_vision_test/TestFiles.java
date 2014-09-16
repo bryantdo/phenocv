@@ -1,6 +1,9 @@
 package test.ddpsc.phenocv.computer_vision_test;
 
 import org.opencv.core.Core;
+import src.ddpsc.phenocv.utility.OpenCV;
+
+import java.io.File;
 
 /**
  * @author cjmcentee
@@ -9,35 +12,47 @@ public class TestFiles {
 
     // Load openCV native library
     static {
-        System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+        OpenCV.Load();
     }
 
-    public final static String PLANT_ROOT = "/Users/bryantd/IdeaProjects/phenocv/resources/images";
-    public final static String TEST_RESULT_ROOT = "/Users/bryantd/IdeaProjects/phenocv/resources/images/computer vision test results/";
-    public final static String TEST_SOURCE_ROOT = "/Users/bryantd/IdeaProjects/phenocv/resources/images/computer vision training/";
+    private static final String PROJECT_ROOT = System.getProperty("user.dir");
+
+    public final static String PLANT_ROOT = PROJECT_ROOT
+            + File.separator + "resources"
+            + File.separator + "images";
+
+    public final static String TEST_RESULT_ROOT = PROJECT_ROOT
+            + File.separator + "resources"
+            + File.separator + "images"
+            + File.separator + "computer_vision_test_results" + File.separator;
+
+    public final static String TEST_SOURCE_ROOT = PROJECT_ROOT
+            + File.separator + "resources"
+            + File.separator + "images"
+            + File.separator + "computer_vision_training" + File.separator;
 
     public final static String RAINBOW_NAME = "rainbow.png";
     public final static String RAINBOW = TEST_SOURCE_ROOT + RAINBOW_NAME;
 
-    public final static String SUBSHAPES_NAME = "many shapes.png";
+    public final static String SUBSHAPES_NAME = "many_shapes.png";
     public final static String SUBSHAPES = TEST_SOURCE_ROOT + SUBSHAPES_NAME;
 
-    public final static String SHAPE_NAME = "simple shape.png";
+    public final static String SHAPE_NAME = "simple_shape.png";
     public final static String SHAPE = TEST_SOURCE_ROOT + SHAPE_NAME;
 
-    public final static String LARGE_GRADIENT_NAME = "large gradient.png";
+    public final static String LARGE_GRADIENT_NAME = "large_gradient.png";
     public final static String LARGE_GRADIENT = TEST_SOURCE_ROOT + LARGE_GRADIENT_NAME;
 
     public final static String GRADIENT_NAME = "gradient.png";
     public final static String GRADIENT = TEST_SOURCE_ROOT + GRADIENT_NAME;
 
-    public final static String GRADIENT_GREENSPOT_NAME = "gradient with green spot.png";
+    public final static String GRADIENT_GREENSPOT_NAME = "gradient_with_green_spot.png";
     public final static String GRADIENT_GREENSPOT = TEST_SOURCE_ROOT + GRADIENT_GREENSPOT_NAME;
 
-    public final static String GRADIENT_MASK_NAME = "gradient mask.png";
+    public final static String GRADIENT_MASK_NAME = "gradient_mask.png";
     public final static String GRADIENT_MASK = TEST_SOURCE_ROOT + GRADIENT_MASK_NAME;
 
-    public final static String TINY_TEST = TEST_SOURCE_ROOT + "tiny test image.png";
+    public final static String TINY_TEST = TEST_SOURCE_ROOT + "tiny_test_image.png";
     public final static byte TINY_PIXELS_BGR[] =
             new byte[] {// BLUE   GREEN     RED
                     (byte)255, (byte)255, (byte)255, // white to black

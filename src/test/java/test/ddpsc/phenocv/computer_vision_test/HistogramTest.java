@@ -7,6 +7,7 @@ import src.ddpsc.phenocv.computer_vision.ColorSpace;
 import src.ddpsc.phenocv.computer_vision.ColorImage;
 import src.ddpsc.phenocv.computer_vision.GrayImage;
 import src.ddpsc.phenocv.computer_vision.Histogram;
+import src.ddpsc.phenocv.utility.OpenCV;
 
 /**
  * Untested:
@@ -19,10 +20,10 @@ public class HistogramTest {
 
     // Load openCV native library
     static {
-        System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+        OpenCV.Load();
     }
 
-    private static final String NAME_PREFIX = "Histogram Test ";
+    private static final String NAME_PREFIX = "Histogram_Test_";
     private static final HistogramPartition BGR = new HistogramPartition(ColorSpace.BGR, 75);
 
     @Test
@@ -41,19 +42,19 @@ public class HistogramTest {
         GrayImage spotOntoGrad = spotGradientHistogram.backProjectionOf(gradient);
 
         gradOntoSpot.writeTo(TestFiles.TEST_RESULT_ROOT + NAME_PREFIX
-                + "back project grad onto spot result.png");
+                + "back_project_grad_onto_spot_result.png");
         spotOntoSpot.writeTo(TestFiles.TEST_RESULT_ROOT + NAME_PREFIX
-                + "back project spot onto spot result.png");
+                + "back_project_spot_onto_spot_result.png");
 
         gradOntoGrad.writeTo(TestFiles.TEST_RESULT_ROOT + NAME_PREFIX
-                + "back project grad onto grad result.png");
+                + "back_project_grad_onto_grad_result.png");
         spotOntoGrad.writeTo(TestFiles.TEST_RESULT_ROOT + NAME_PREFIX
-                + "back project spot onto grad result.png");
+                + "back_project_spot_onto_grad_result.png");
 
         gradOntoSpot.threshold();
         spotGradient.maskWith(gradOntoSpot);
         spotGradient.writeTo(TestFiles.TEST_RESULT_ROOT + NAME_PREFIX
-                + "back project grad onto spot isolation.png");
+                + "back_project_grad_onto_spot_isolation.png");
     }
 
     @Test
@@ -64,12 +65,12 @@ public class HistogramTest {
         GrayImage backProjection = gradientHistogram.backProjectionOf(gradient);
 
         backProjection.writeTo(TestFiles.TEST_RESULT_ROOT + NAME_PREFIX
-                + "back project smoothed histogram grad onto grad result.png");
+                + "back_project_smoothed_histogram_grad_onto_grad_result.png");
 
         backProjection.threshold();
         gradient.maskWith(backProjection);
         gradient.writeTo(TestFiles.TEST_RESULT_ROOT + NAME_PREFIX
-                + "back project smoothed histogram grad onto grad isolation.png");
+                + "back_project_smoothed_histogram_grad_onto_grad_isolation.png");
     }
 
     @Test
@@ -83,12 +84,12 @@ public class HistogramTest {
         GrayImage gradOntoSpot = gradientHistogram.backProjectionOf(spotGradient);
 
         gradOntoSpot.writeTo(TestFiles.TEST_RESULT_ROOT + NAME_PREFIX
-                + "back project large grad onto spot result.png");
+                + "back_project_large_grad_onto_spot_result.png");
 
         gradOntoSpot.threshold();
         spotGradient.maskWith(gradOntoSpot);
         spotGradient.writeTo(TestFiles.TEST_RESULT_ROOT + NAME_PREFIX
-                + "back project large grad onto spot isolation.png");
+                + "back_project_large_grad_onto_spot_isolation.png");
     }
 
 }

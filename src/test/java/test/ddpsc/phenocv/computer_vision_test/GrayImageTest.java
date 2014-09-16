@@ -5,6 +5,7 @@ import org.junit.Test;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import src.ddpsc.phenocv.computer_vision.GrayImage;
+import src.ddpsc.phenocv.utility.OpenCV;
 
 import static org.hamcrest.CoreMatchers.*;
 
@@ -19,7 +20,7 @@ public class GrayImageTest {
 
     // Load openCV native library
     static {
-        System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+        OpenCV.Load();
     }
 
     @Test

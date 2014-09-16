@@ -5,6 +5,7 @@ import src.ddpsc.phenocv.computer_vision.*;
 import src.ddpsc.phenocv.utility.Lists;
 import src.ddpsc.phenocv.utility.Tuple;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,8 +39,20 @@ public class ColorIsolation implements Releasable {
         trained = true;
     }
 
-    public void trainFiles(List<Tuple<String, String>> trainingFiles) {
-        train(Lists.loadMaskedImagePairs(trainingFiles));
+    public void trainByFiles(List<Tuple<String, String>> trainingFiles) {
+
+        if (trainingFiles.size() == 0)
+            return;
+
+        for (Tuple<String, String> pair : trainingFiles) {
+            ColorImage image = new ColorImage(pair.item1);
+            GrayImage mask = new GrayImage(pair.item2);
+
+            histogram.addImageData(histogramPartition, image, mask);
+
+            image.release();
+            mask.release();
+        }
     }
 
     public void fastIsolation(ColorImage image) {
@@ -107,6 +120,53 @@ public class ColorIsolation implements Releasable {
             backProjection.release();
 
             return new Tuple<Image, ColorImage>(shapes.maskWithAverageValues(image), copy);
+        }
+    }
+
+
+    /// ======================================================================
+    /// Execution Entry Point
+    /// ======================================================================
+
+    /**
+     * The one method call entry point to this algorithm.
+     *
+     * trainFiles should be a list of paired filenames, the first filename being the unmodified test
+     * image, the second file being a mask to determine which pixels of that test image are to be
+     * trained on.
+     *
+     * The two images should be of the same dimensions. The non-black pixels of the mask indicate
+     * the mask is to include the corresponding pixels of the test image in trianing, all black pixels
+     * indicate their corresponding pixels aren't to be trained on.
+     *
+     * See: {project dir}/resources/images/color_isolation_training
+     *
+     * The process files are the files to work on and isolate based on the training images.
+     *
+     * @param trainFiles        tuple-list of training images
+     * @param processFiles      list of files to run the algorithm on
+     * @param outputDirectory   directory to output processed files to
+     */
+    public static void Execute(List<Tuple<String, String>> trainFiles, List<String> processFiles, String outputDirectory) {
+        // 100 bins out of 180 possible values, compressing the color space makes for better results
+        // as observed by testing
+        HistogramPartition halfSizedHSVHistogram = new HistogramPartition(ColorSpace.HSV, 100);
+        ColorIsolation isolator = new ColorIsolation(halfSizedHSVHistogram);
+
+        isolator.trainByFiles(trainFiles);
+
+        for (String filename : processFiles) {
+            File file = new File(filename);
+
+            if (file.exists() && ! file.isDirectory()) {
+
+                ColorImage image = new ColorImage(filename);
+                isolator.fastIsolation(image);
+
+                String name = file.getName();
+                image.writeTo(outputDirectory + "/" + name);
+                image.release();
+            }
         }
     }
 

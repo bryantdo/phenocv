@@ -35,3 +35,4 @@ resources/images/color isolation test/results/*.png
 resources/images/color isolation test/results/*/
 resources/images/computer vision test results/*.png
 resources/images/program/
+.idea/uiDesigner.xml
