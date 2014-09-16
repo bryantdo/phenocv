@@ -1,0 +1,6 @@
+src.ddpsc.phenocv.algorithms
+src.ddpsc.phenocv.computer_vision
+src.ddpsc.phenocv.debug
+src.ddpsc.phenocv.utility
+test.ddpsc.phenocv.algorithms_test
+test.ddpsc.phenocv.computer_vision_test
