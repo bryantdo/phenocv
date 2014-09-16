@@ -11,7 +11,7 @@ import java.util.Arrays;
 /**
 * @author cjmcentee
 */
-public class ShapeImageFactory extends ReversableObjectFactory<Mat, Shape> implements Releasable {
+class ShapeImageFactory extends ReversableObjectFactory<Mat, Shape> implements Releasable {
 
     // Display settings for drawing the shape onto a mask
     static final int DRAW_ALL = -1;

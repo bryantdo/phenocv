@@ -10,7 +10,7 @@ import java.util.List;
 /**
  * @author cjmcentee
  */
-public class ShapeCollectionImageFactory extends ReversableObjectFactory<Mat, ShapeCollection> implements Releasable{
+class ShapeCollectionImageFactory extends ReversableObjectFactory<Mat, ShapeCollection> implements Releasable{
 
     ShapeCollectionImageFactory() {
         super();
