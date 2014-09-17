@@ -12,14 +12,20 @@ public class OpenCV {
 
     public static void Load() {
         String operatingSystem = System.getProperty("os.name");
-
         if (operatingSystem.startsWith("Windows")) {
-            try {
-                addLibraryPath(System.getProperty("user.dir") + "\\lib\\windows\\x86");
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+          try {
+              addLibraryPath(System.getProperty("user.dir") + "\\lib\\windows\\x86");
+          } catch (Exception e) {
+              e.printStackTrace();
+          }
+          System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+        } else if (operatingSystem.startsWith("Mac")) {
+          try {
+            addLibraryPath(System.getProperty("user.dir") + "/lib/macosx/x64");
+          } catch (Exception e) {
+            e.printStackTrace();
+          }
+          System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
         }
 
         else {
