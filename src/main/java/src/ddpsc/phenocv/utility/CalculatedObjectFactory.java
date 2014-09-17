@@ -11,7 +11,7 @@ package src.ddpsc.phenocv.utility;
  *      or when a part of an object has yet to be instantiated
  *
  * This class represents the second use-case. If the object isn't
- * instantiated, falling CalculatedObjectFactory<OutType, InType>#getFrom()
+ * instantiated, falling {@link CalculatedObjectFactory#getFrom(Object)}
  * will calculate it and return it. If the object has been calculated,
  * it returns the object.
  *

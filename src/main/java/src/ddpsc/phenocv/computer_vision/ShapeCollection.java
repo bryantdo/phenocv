@@ -3,6 +3,7 @@ package src.ddpsc.phenocv.computer_vision;
 import org.opencv.core.*;
 import org.opencv.highgui.Highgui;
 import org.opencv.imgproc.Imgproc;
+import src.ddpsc.phenocv.utility.ReleaseContainer;
 
 import java.util.ArrayList;
 import java.util.List;

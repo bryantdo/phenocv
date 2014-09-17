@@ -4,6 +4,8 @@ import org.opencv.core.MatOfFloat;
 import org.opencv.core.MatOfInt;
 
 /**
+ * Defines a type of histogram by both number of bins and color channel.
+ *
  * All histograms divide image pixel values into a series of buckets, or bins.
  *
  * This class defines what those bins are. Its two parameters are:

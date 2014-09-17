@@ -19,8 +19,8 @@ public class Readable {
      * Gray images are 1-dimensional unsigned 8bit
      * Color images are 3-dimensional unsigned 8bit
      *
-     * @param cvType
-     * @return
+     * @param cvType        opencv formatted type
+     * @return              human readable opencv type
      */
     public static String type(int cvType) {
         String type;

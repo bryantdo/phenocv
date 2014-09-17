@@ -33,7 +33,7 @@ public class ColorIsolation implements Releasable {
             ColorImage image = trainingPair.item1;
             GrayImage mask = trainingPair.item2;
 
-            histogram.addImageData(histogramPartition, image, mask);
+            histogram.addImageData(image, mask);
         }
 
         trained = true;
@@ -48,7 +48,7 @@ public class ColorIsolation implements Releasable {
             ColorImage image = new ColorImage(pair.item1);
             GrayImage mask = new GrayImage(pair.item2);
 
-            histogram.addImageData(histogramPartition, image, mask);
+            histogram.addImageData(image, mask);
 
             image.release();
             mask.release();

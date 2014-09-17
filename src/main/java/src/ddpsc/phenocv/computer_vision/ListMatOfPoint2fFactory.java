@@ -2,6 +2,7 @@ package src.ddpsc.phenocv.computer_vision;
 
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.MatOfPoint2f;
+import src.ddpsc.phenocv.utility.ReleaseContainer;
 import src.ddpsc.phenocv.utility.ReversableObjectFactory;
 
 import java.util.ArrayList;

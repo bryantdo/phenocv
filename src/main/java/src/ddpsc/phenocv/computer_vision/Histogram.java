@@ -5,13 +5,13 @@ import org.opencv.core.Mat;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import src.ddpsc.phenocv.utility.Copy;
+import src.ddpsc.phenocv.utility.ReleaseContainer;
 
 import java.util.Arrays;
 import java.util.List;
 
 /**
- * Represents a histogram. A histogram is a measure of the overall color of each pixel
- * in an image.
+ * A histogram is a measure of the overall color of each pixel in an image.
  *
  * The histogram can represents any color space desired by the user.
  *
@@ -45,6 +45,12 @@ public final class Histogram implements Releasable {
         histogram = histogramMat;
     }
 
+    /**
+     * Creates a blank histogram that has no values in it.
+     *
+     * @param histogramPartition    histogram type to initialize
+     * @return                      a blank histogram
+     */
     public static Histogram blank(HistogramPartition histogramPartition) {
         Histogram histogram = new Histogram();
         histogram.histogramPartition = histogramPartition;
@@ -53,6 +59,13 @@ public final class Histogram implements Releasable {
         return histogram;
     }
 
+    /**
+     * Copies this histogram into a new one.
+     *
+     * This is a deep copy.
+     *
+     * @return      a copy of this histogram
+     */
     public Histogram copy() {
         Histogram copy = new Histogram();
         copy.histogramPartition = histogramPartition;
@@ -97,6 +110,18 @@ public final class Histogram implements Releasable {
         return new GrayImage(backProjectedImage);
     }
 
+    /**
+     * Creates a histogram from a {@link ColorImage} and the pixels its mask lets show through.
+     *
+     * The mask must be of the same dimensions as the image.
+     *
+     * @see GrayImage
+     *
+     * @param histogramPartition        type of histogram to generate from the image
+     * @param image                     image to generate the histogram from
+     * @param mask                      mask to hide particular pixels in the image
+     * @return                          a histogram describing the image and mask
+     */
     public static Histogram fromImage(HistogramPartition histogramPartition, ColorImage image, GrayImage mask) {
 
         Mat histogram = new Mat();
@@ -114,6 +139,13 @@ public final class Histogram implements Releasable {
         return new Histogram(histogramPartition, histogram);
     }
 
+    /**
+     * Creates a histogram from every pixel of the supplied {@link ColorImage}.
+     *
+     * @param histogramPartition        type of histogram to generate from the image
+     * @param image                     image to generate the histogram from
+     * @return                          a histogram describing the image
+     */
     public static Histogram fromImage(HistogramPartition histogramPartition, ColorImage image) {
         return fromImage(histogramPartition, image, GrayImage.maskShowAll(image.size()));
     }
@@ -124,14 +156,13 @@ public final class Histogram implements Releasable {
      * Similar to {@link Histogram#fromImage(HistogramPartition, ColorImage, GrayImage)}, but
      * instead of returning a new histogram, it adds the data to this histogram.
      *
-     * @param histogramPartition       channel to convert the image into
-     * @param image         image to get histogram data from
-     * @param mask          mask to select which pixels are turned into histogram data
+     * @see ColorImage
+     * @see GrayImage
+     *
+     * @param image             image to get histogram data from
+     * @param mask              mask to select which pixels are turned into histogram data
      */
-    public void addImageData(HistogramPartition histogramPartition, ColorImage image, GrayImage mask) {
-
-        if (this.histogramPartition != histogramPartition)
-            return;
+    public void addImageData(ColorImage image, GrayImage mask) {
 
         List<Mat> convertedMatrix = Arrays.asList(image.cvAsChannel(histogramPartition));
         Imgproc.calcHist(
@@ -146,8 +177,16 @@ public final class Histogram implements Releasable {
         ReleaseContainer.releaseMatrices(convertedMatrix);
     }
 
-    public void addImageData(HistogramPartition histogramPartition, ColorImage image) {
-        addImageData(histogramPartition, image, GrayImage.maskShowAll(image.size()));
+    /**
+     * Adds the histogram of the supplied {@link ColorImage} to this histogram.
+     *
+     * Similar to {@link Histogram#fromImage(HistogramPartition, ColorImage)}, but
+     * instead of returning a new histogram, it adds the data to this histogram.
+     *
+     * @param image             image to get histogram data from
+     */
+    public void addImageData(ColorImage image) {
+        addImageData(image, GrayImage.maskShowAll(image.size()));
     }
 
 
@@ -181,6 +220,10 @@ public final class Histogram implements Releasable {
     /// ======================================================================
     /// Releasable
     /// ======================================================================
+
+    /**
+     * Releases the native memory associated with this object.
+     */
     public void release() {
         histogram.release();
     }

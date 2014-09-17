@@ -5,12 +5,21 @@ import org.opencv.highgui.Highgui;
 import org.opencv.imgproc.Imgproc;
 import src.ddpsc.phenocv.debug.Readable;
 import src.ddpsc.phenocv.utility.Directory;
+import src.ddpsc.phenocv.utility.ReleaseContainer;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * An abstract 2D image of any arbitrary color channels.
+ *
+ * This is a base image class with no defined color channels. It represents
+ * all operations that can be done on any image of any color channel.
+ *
+ * @see ColorImage
+ * @see GrayImage
+ *
  * @author cjmcentee
  */
 public abstract class Image implements Writable, Releasable {
@@ -20,6 +29,7 @@ public abstract class Image implements Writable, Releasable {
     /// ======================================================================
     /// Constructors
     /// ======================================================================
+
     protected Image() {
         image = new Mat();
     }
@@ -48,6 +58,23 @@ public abstract class Image implements Writable, Releasable {
     /// ======================================================================
     /// Writable
     /// ======================================================================
+
+    /**
+     * Writes an image to the specified file.
+     *
+     * If the file's directory doesn't exist, it makes the directory.
+     *
+     * Overwrites any image of the same name, no warning is given.
+     *
+     * Can only print images with 3 or fewer channels. Images with 2
+     * channels are displayed as colored images in the blue-green
+     * channels.
+     *
+     * If an image has more than 3 channels, does not throw any errors,
+     * it simply does not write the image to disk.
+     *
+     * @param filename      filename of where to save the image
+     */
     @Override
     public void writeTo(String filename) {
         Directory.EnsurePathExistsFor(filename);
@@ -74,8 +101,14 @@ public abstract class Image implements Writable, Releasable {
 
 
     /// ======================================================================
-    /// Writable
+    /// Releasable
     /// ======================================================================
+
+    /**
+     * Releases the native memory associated with this object.
+     *
+     * @see Releasable
+     */
     @Override
     public void release() {
         image.release();
@@ -103,7 +136,7 @@ public abstract class Image implements Writable, Releasable {
 
     /**
      * Pixels set to black where they don't overlap with the supplied {@link Shape}.
-     * <p/>
+     *
      * Holes in the shape are considered not to overlap. Only the filled in portion
      * of the shape is overlapping.
      *
@@ -118,7 +151,7 @@ public abstract class Image implements Writable, Releasable {
 
     /**
      * Pixels set to black where they don't overlap with the supplied {@link ShapeCollection}.
-     * <p/>
+     *
      * Holes in the collection are considered not to overlap. Only filled in shapes are
      * overlapping.
      *
@@ -134,13 +167,13 @@ public abstract class Image implements Writable, Releasable {
 
     /**
      * Applies a median filter to the image.
-     * <p/>
+     *
      * Generally median filters sharpen and smooth the image while removing
      * small dots of noise.
-     * <p/>
+     *
      * The median filter behaves by setting each pixel to the median value of
      * any of its neighboring pixels within the specified radius.
-     * <p/>
+     *
      * The strength of the filter is the same as that radius. Usual values
      * are in the range of 2-20.
      *

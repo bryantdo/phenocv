@@ -3,16 +3,17 @@ package src.ddpsc.phenocv.computer_vision;
 import org.opencv.core.*;
 import org.opencv.highgui.Highgui;
 import org.opencv.imgproc.Imgproc;
-import src.ddpsc.phenocv.debug.*;
-import src.ddpsc.phenocv.debug.Readable;
+import src.ddpsc.phenocv.utility.ReleaseContainer;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Defines a Shape, a continuous group of pixels. The shape isn't necessarily
- * tied to an image, but it's normal usecase is to indicate to an algorithm
- * which portions of an image are distinct from each other.
+ * A shape is a continuous collection of pixels.
+ *
+ * The shape isn't necessarily tied to an image, but it's normal
+ * use-case is to indicate to an algorithm which portions of an
+ * image are distinct from each other.
  *
  * This is an abstraction on top of OpenCVs contour system. Instead of dealing
  * with a mess of inner and outer contours, shapes are defined by their pixels
