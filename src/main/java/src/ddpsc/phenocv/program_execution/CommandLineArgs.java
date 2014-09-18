@@ -151,7 +151,4 @@ public class CommandLineArgs {
       displayUsage);
     writer.flush();
   }
-
-
-
 }

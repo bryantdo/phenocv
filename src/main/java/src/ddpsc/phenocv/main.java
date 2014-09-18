@@ -1,5 +1,6 @@
 package src.ddpsc.phenocv;
 
+import org.opencv.core.Core;
 import src.ddpsc.phenocv.computer_vision.ColorImage;
 import src.ddpsc.phenocv.program_execution.CommandLineArgs;
 import src.ddpsc.phenocv.program_execution.ImageProcessor;
@@ -18,7 +19,8 @@ import java.util.List;
 public class main {
 
   static {
-    OpenCV.Load();
+    nu.pattern.OpenCV.loadShared();
+    System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
   }
 
   public static void main(String[] args) throws InterruptedException {
