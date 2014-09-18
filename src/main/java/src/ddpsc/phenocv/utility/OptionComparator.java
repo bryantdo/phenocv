@@ -10,7 +10,7 @@ import java.util.Comparator;
  * Description:
  */
 public class OptionComparator<T extends Option> implements Comparator<T> {
-  private static final String OPTS_ORDER = "tpo";
+  private static final String OPTS_ORDER = "tpon";
 
   public int compare(T o1, T o2) {
     return OPTS_ORDER.indexOf(o1.getOpt()) - OPTS_ORDER.indexOf(o2.getOpt());

@@ -18,6 +18,7 @@ public class CommandLineArgs {
   public String trainingDirectory;
   public String processDirectory;
   public String outputDirectory;
+  public int numThreads;
   public boolean verifiedOptions;
   private Options options;
 
@@ -34,26 +35,37 @@ public class CommandLineArgs {
    */
   public Options constructOptions() {
     final Options options = new Options();
-
+    int cores = Runtime.getRuntime().availableProcessors();
     Option trainingDirectory = OptionBuilder.withArgName("trainingDirectory")
       .withLongOpt("trainingDirectory")
       .hasArg()
+      .withType(String.class)
       .withDescription("Directory containing images + masks used to train classifier. Files should be named " +
       "in pairs like file.png file_mask.png")
       .create("t");
     Option processDirectory = OptionBuilder.withArgName("processDirectory")
       .withLongOpt("processDirectory")
       .hasArg()
+      .withType(String.class)
       .withDescription("Directory containing images to process.")
       .create("p");
     Option outputDirectory = OptionBuilder.withArgName("outputDirectory")
       .withLongOpt("outputDirectory")
       .hasArg()
+      .withType(String.class)
       .withDescription("Directory in which to output processed images.")
       .create("o");
+    Option numThreads = OptionBuilder.withArgName("numThreads")
+      .withLongOpt("numThreads")
+      .hasArg()
+      .withType(Number.class)
+      .withDescription("Number of threads to use when processing images. Defaults to the number " +
+        "of cores in your system = " + cores + ".")
+      .create("n");
     options.addOption(trainingDirectory);
     options.addOption(processDirectory);
     options.addOption(outputDirectory);
+    options.addOption(numThreads);
     return options;
   }
 
@@ -83,6 +95,8 @@ public class CommandLineArgs {
       } else {
         System.out.println("Please specify output directory.");
       }
+      String threads = commandLine.getOptionValue("n", new Integer(Runtime.getRuntime().availableProcessors()).toString());
+      numThreads = Integer.parseInt(threads);
       if(hasT && hasP && hasO) {
         verifiedParameters = true;
       }
@@ -121,7 +135,7 @@ public class CommandLineArgs {
                                 final int spacesBeforeOptionDescription,
                                 final boolean displayUsage,
                                 final OutputStream out) {
-    final String commandLineSyntax = "java -cp plantcv.jar";
+    final String commandLineSyntax = "java -jar plantcv.jar";
     final PrintWriter writer = new PrintWriter(out);
     final HelpFormatter helpFormatter = new HelpFormatter();
     helpFormatter.setOptionComparator(new OptionComparator());

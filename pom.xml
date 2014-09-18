@@ -9,7 +9,6 @@
     <artifactId>phenocv</artifactId>
     <version>1.0</version>
     <packaging>jar</packaging>
-    <!-- Where to get the OpenCV dependencies from -->
     <repositories>
         <repository>
             <id>javaopencvbook</id>
@@ -26,7 +25,7 @@
                         <manifest>
                             <addClasspath>true</addClasspath>
                             <classpathPrefix>lib/</classpathPrefix>
-                            <!--<mainClass>com.mycompany.app.App</mainClass> We need a main class -->
+                            <mainClass>src.ddpsc.phenocv.main</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
@@ -86,6 +85,16 @@
             <artifactId>junit-addons</artifactId>
             <version>1.4</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>com.springsource.org.apache.commons.cli</artifactId>
+            <version>1.2.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>1.3.2</version>
         </dependency>
     </dependencies>
 </project>

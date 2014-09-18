@@ -62,10 +62,10 @@ public class ColorIsolationTest {
 
         HistogramPartition[] histogramPartitions = new HistogramPartition[] {
                 new HistogramPartition(ColorSpace.HSV, 100),
-                new HistogramPartition(ColorSpace.HLS, 100)};
+                new HistogramPartition(ColorSpace.HLS, 100)
+        };
 
         for (HistogramPartition histogramPartition : histogramPartitions) {
-
             System.out.println("Channel: " + histogramPartition.toString());
             ColorIsolation colorIsolation = new ColorIsolation(histogramPartition);
             colorIsolation.train(trainingPairs);

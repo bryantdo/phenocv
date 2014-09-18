@@ -7,33 +7,51 @@ import src.ddpsc.phenocv.computer_vision.GrayImage;
 import src.ddpsc.phenocv.computer_vision.HistogramPartition;
 import src.ddpsc.phenocv.utility.Tuple;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.*;
+
+import static java.util.Collections.synchronizedList;
 
 
-/**
- * User: bryantd
- * Date: 9/17/14
- * Time: 4:03 PM
- * Description:
- */
 public class ImageProcessor {
+  private final List<Tuple<String, ColorImage>> imagesToProcess;
+  private final List<Tuple<String, ColorImage>> resultsImagesTuples;
+  private final ColorIsolation colorIsolation;
+  private final int numThreads;
 
-  List<ColorImage> processImageSet;
-
-  public ImageProcessor(LoadedImages loadedImages) {
-    processImageSet = loadedImages.processImageSet;
-
+  public ImageProcessor(ImagesIO loadedImages, int numThreads) {
+    this.numThreads = numThreads;
+    imagesToProcess = synchronizedList(loadedImages.processImageSet);
+    resultsImagesTuples = synchronizedList(new ArrayList<Tuple<String, ColorImage>>());
     List<Tuple<ColorImage, GrayImage>> trainingImageSet = loadedImages.trainingImageSet;
-    ColorIsolation colorIsolation = new ColorIsolation(new HistogramPartition(ColorSpace.HSV, 100));
+    colorIsolation = new ColorIsolation(new HistogramPartition(ColorSpace.HSV, 100));
     colorIsolation.train(trainingImageSet);
   }
 
-  private boolean isolateImage(ColorImage image) {
-    boolean success = false;
-    
-
-    return success;
+  public List<Tuple<String, ColorImage>> getProcessedImages() throws Exception {
+    if(imagesToProcess.size() != resultsImagesTuples.size()) {
+      ExecutorService pool = Executors.newFixedThreadPool(numThreads);
+      List<Future<Tuple<String, ColorImage>>> results = new ArrayList<Future<Tuple<String, ColorImage>>>();
+      for(Tuple<String, ColorImage> imageTuple : imagesToProcess) {
+        Callable<Tuple<String, ColorImage>> callable = new ImageProcessorCallable(colorIsolation, imageTuple);
+        Future<Tuple<String, ColorImage>> futureImageTuple = pool.submit(callable);
+        results.add(futureImageTuple);
+      }
+      for(Future<Tuple<String, ColorImage>> result : results) {
+        addImageToResults(result.get());
+      }
+      pool.shutdown();
+      try { pool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS); }
+      catch(Exception e) { throw new Exception(e); }
+    }
+    return resultsImagesTuples;
   }
 
-
+  private void addImageToResults(Tuple<String, ColorImage> imageTuple) {
+    synchronized(resultsImagesTuples) {
+      resultsImagesTuples.add(imageTuple);
+      resultsImagesTuples.notifyAll();
+    }
+  }
 }

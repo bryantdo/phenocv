@@ -6,27 +6,37 @@ import src.ddpsc.phenocv.utility.Lists;
 import src.ddpsc.phenocv.utility.Tuple;
 
 import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Vector;
 import org.apache.commons.io.*;
 
-public class LoadedImages {
+public class ImagesIO {
 
   public List<Tuple<ColorImage, GrayImage>> trainingImageSet;
-  public List<ColorImage> processImageSet;
+  public List<Tuple<String, ColorImage>> processImageSet;
+  public String outputDirectory;
 
-  public LoadedImages(String trainingDirectory, String processDirectory, String outputDirectory) {
-    trainingImageSet = new Vector<Tuple<ColorImage, GrayImage>>();
-    processImageSet = new Vector<ColorImage>();
-    boolean trainingSuccess = loadTrainingImages(trainingDirectory);
-    if(trainingSuccess) {
+  public ImagesIO(String trainingDirectory, String processDirectory, String outputDirectory) throws Exception {
+    trainingImageSet = new ArrayList<Tuple<ColorImage, GrayImage>>();
+    processImageSet = new ArrayList<Tuple<String, ColorImage>>();
+    if(loadTrainingImages(trainingDirectory)) {
       System.out.println("Loaded " + trainingImageSet.size() + " pairs of training images + masks.");
+    } else {
+      throw new Exception("Unable to load training images!");
     }
-    boolean processSuccess = loadProcessImages(processDirectory);
-    if(processSuccess) {
+    if(loadProcessImages(processDirectory)) {
       System.out.println("Loaded " + processImageSet.size() + " images to process.");
+    } else {
+      throw new Exception("Unable to load images to process!");
+    }
+    if(verifyOutputDirectory(outputDirectory)) {
+      System.out.println("Verified output directory.");
+    } else {
+      throw new Exception("Unable to verify output directory!");
     }
   }
 
@@ -115,10 +125,39 @@ public class LoadedImages {
       if(pngFiles.size() > 0) {
         List<ColorImage> colorImages = new Vector<ColorImage>();
         for(File image : pngFiles) {
-          processImageSet.add(new ColorImage(image.getPath()));
+          Tuple<String, ColorImage> imageToAdd = new Tuple<String, ColorImage>(image.getName(), new ColorImage(image.getPath()));
+          processImageSet.add(imageToAdd);
         }
         success = true;
       }
+    }
+    return success;
+  }
+
+  private boolean verifyOutputDirectory(String outputDirectory) throws Exception {
+    boolean success = true;
+    File outputPath = new File(outputDirectory);
+    if(!outputPath.exists()) {
+      try {
+        outputPath.mkdirs();
+      } catch (Exception e) {
+        success = false;
+        throw new Exception("Error when creating output directory: " + e.getMessage());
+      }
+    }
+    this.outputDirectory = outputDirectory;
+    return success;
+  }
+
+  public boolean writeProcessedImages(List<Tuple<String, ColorImage>> imagesTuples) {
+    boolean success = false;
+    for(Tuple<String, ColorImage> imageTuple : imagesTuples) {
+      String inputFilename = imageTuple.item1;
+      String inputFileBasename = FilenameUtils.getBaseName(inputFilename);
+      String outputFilename = inputFileBasename + "_processed.png";
+      ColorImage outputImage = imageTuple.item2;
+      Path outputFilePath = Paths.get(outputDirectory + File.separator + outputFilename);
+      outputImage.writeTo(outputFilePath.toString());
     }
     return success;
   }
