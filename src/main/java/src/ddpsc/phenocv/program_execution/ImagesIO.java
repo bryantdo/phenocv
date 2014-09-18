@@ -48,25 +48,28 @@ public class ImagesIO {
       && trainingDirectoryFile.isDirectory()) {
       success = false;
     } else {
-      List<File> pngFiles = new Vector<File>();
+      List<File> imageFiles = new Vector<File>();
       File[] allFiles = trainingDirectoryFile.listFiles();
       for(File file : allFiles) {
         String fileName = file.getName(), fileExtension = "";
         int i = fileName.lastIndexOf('.');
         if(i > 0) { fileExtension = fileName.substring(i+1); }
-        if(fileExtension.contentEquals("png")) {
-          pngFiles.add(file);
+        if(fileExtension.equalsIgnoreCase("png") ||
+          fileExtension.equalsIgnoreCase("jpg") ||
+          fileExtension.equalsIgnoreCase("jpeg") ||
+          fileExtension.equalsIgnoreCase("tiff")) {
+          imageFiles.add(file);
         }
       }
-      if(pngFiles.size() > 0) {
-        Collections.sort(pngFiles);
-        for(int i = 0; i < pngFiles.size(); i+=2) {
-          String firstFilename = pngFiles.get(i).getName(),
-            secondFilename = pngFiles.get(i+1).getName(),
+      if(imageFiles.size() > 0) {
+        Collections.sort(imageFiles);
+        for(int i = 0; i < imageFiles.size(); i+=2) {
+          String firstFilename = imageFiles.get(i).getName(),
+            secondFilename = imageFiles.get(i+1).getName(),
             imageFilename = "",
             maskFilename = "",
-            firstPath = pngFiles.get(i).getPath(),
-            secondPath = pngFiles.get(i+1).getPath(),
+            firstPath = imageFiles.get(i).getPath(),
+            secondPath = imageFiles.get(i+1).getPath(),
             imagePath = "",
             maskPath = "";
 
@@ -111,20 +114,23 @@ public class ImagesIO {
       && processDirectoryFile.isDirectory()) {
       success=false;
     } else {
-      List<File> pngFiles = new Vector<File>();
+      List<File> imageFiles = new Vector<File>();
       File[] allFiles = processDirectoryFile.listFiles();
       for(File file : allFiles) {
         String fileName = file.getName(), fileExtension = "";
         int i = fileName.lastIndexOf('.');
         if(i > 0) { fileExtension = fileName.substring(i+1); }
-        if(fileExtension.contentEquals("png")) {
-          pngFiles.add(file);
+        if(fileExtension.equalsIgnoreCase("png") ||
+          fileExtension.equalsIgnoreCase("jpg") ||
+          fileExtension.equalsIgnoreCase("jpeg") ||
+          fileExtension.equalsIgnoreCase("tiff")) {
+          imageFiles.add(file);
         }
       }
 
-      if(pngFiles.size() > 0) {
+      if(imageFiles.size() > 0) {
         List<ColorImage> colorImages = new Vector<ColorImage>();
-        for(File image : pngFiles) {
+        for(File image : imageFiles) {
           Tuple<String, ColorImage> imageToAdd = new Tuple<String, ColorImage>(image.getName(), new ColorImage(image.getPath()));
           processImageSet.add(imageToAdd);
         }

@@ -26,7 +26,8 @@ public class main {
   public static void main(String[] args) throws InterruptedException {
     CommandLineArgs commandLineArgs = new CommandLineArgs(args);
     if(args.length < 6 || !commandLineArgs.verifiedOptions) {
-      commandLineArgs.printHelp(commandLineArgs.constructOptions(), 80, "How to use phenocv:", "Copyright 2014", 4, 5, true, System.out);
+      commandLineArgs.printHelp(commandLineArgs.constructOptions(), 80, "", "Note: Allowed image " +
+        "extensions include [jpg, jpeg, tiff, png]\nCopyright 2014", 4, 5, true, System.out);
     } else {
       String outputDirectory = commandLineArgs.outputDirectory;
 

@@ -41,7 +41,7 @@ public class CommandLineArgs {
       .hasArg()
       .withType(String.class)
       .withDescription("Directory containing images + masks used to train classifier. Files should be named " +
-      "in pairs like file.png file_mask.png")
+      "in pairs like file.ext file_mask.ext")
       .create("t");
     Option processDirectory = OptionBuilder.withArgName("processDirectory")
       .withLongOpt("processDirectory")
@@ -80,20 +80,14 @@ public class CommandLineArgs {
       if(commandLine.hasOption("t")) {
         hasT = true;
         trainingDirectory = commandLine.getOptionValue("t");
-      } else {
-        System.out.println("Please specify training directory.");
       }
       if(commandLine.hasOption("p")) {
         hasP = true;
         processDirectory = commandLine.getOptionValue("p");
-      } else {
-        System.out.println("Please specify process directory.");
       }
       if(commandLine.hasOption("o")) {
         hasO = true;
         outputDirectory = commandLine.getOptionValue("o");
-      } else {
-        System.out.println("Please specify output directory.");
       }
       String threads = commandLine.getOptionValue("n", new Integer(Runtime.getRuntime().availableProcessors()).toString());
       numThreads = Integer.parseInt(threads);
