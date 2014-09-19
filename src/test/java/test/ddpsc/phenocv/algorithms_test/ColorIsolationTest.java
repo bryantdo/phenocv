@@ -18,7 +18,7 @@ import java.util.List;
 public class ColorIsolationTest {
 
     static {
-        OpenCV.Load();
+        OpenCV.load();
     }
 
     private static final String PROJECT_ROOT = System.getProperty("user.dir");

@@ -1,6 +1,5 @@
 package test.ddpsc.phenocv.computer_vision_test;
 
-import org.opencv.core.Core;
 import src.ddpsc.phenocv.utility.OpenCV;
 
 import java.io.File;
@@ -12,7 +11,7 @@ public class TestFiles {
 
     // Load openCV native library
     static {
-        OpenCV.Load();
+        OpenCV.load();
     }
 
     private static final String PROJECT_ROOT = System.getProperty("user.dir");

@@ -2,6 +2,7 @@ package src.ddpsc.phenocv.utility;
 
 import org.opencv.core.Core;
 
+import java.io.File;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 
@@ -10,30 +11,48 @@ import java.util.Arrays;
  */
 public class OpenCV {
 
-    public static void Load() {
+    private static String WINDOWS_FILEPATH_FAILURE =
+            "For Windows systems, the OpenCV 2.4.9 java bindings .dll must be located at " +
+            "\\lib\\windows\\x86 with respect to \"" + System.getProperty("user.dir") + "\".\n" +
+            "The appropriate windows .dll is located in the repository for this project at " +
+            "github.com/bryantdo/phenocv.";
+
+    private static String UNKNOWN_OS_FAILURE =
+            "Cannot load OpenCV native libraries because the operating system is not recognized.";
+
+    public static void load() {
         String operatingSystem = System.getProperty("os.name");
+
         if (operatingSystem.startsWith("Windows")) {
-          try {
-              addLibraryPath(System.getProperty("user.dir") + "\\lib\\windows\\x86");
-          } catch (Exception e) {
-              e.printStackTrace();
-          }
-          System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
-        } else if (operatingSystem.startsWith("Mac")) {
-          try {
-            addLibraryPath(System.getProperty("user.dir") + "/lib/macosx/x64");
-          } catch (Exception e) {
-            e.printStackTrace();
-          }
-          System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+
+            File path = new File(System.getProperty("user.dir") + "\\lib\\windows\\x86");
+
+            if ( ! path.exists())
+                failWith(WINDOWS_FILEPATH_FAILURE);
+
+            try {
+                addLibraryPath(path.getPath());
+                System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+            }
+            catch (Exception e) {
+                failWith(WINDOWS_FILEPATH_FAILURE);
+            }
         }
 
-        else {
-            System.out.println("Unknown operating system detected, attempting to load OpenCV library."
-                + " Look in src.ddpsc.phenocv.utility.OpenCV#Load() to add your operating system to the loading process.");
+        // Linux, Mac
+        else if (operatingSystem.startsWith("Mac") || operatingSystem.startsWith("Linux")) {
+            nu.pattern.OpenCV.loadShared();
             System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
         }
 
+        else {
+            failWith(UNKNOWN_OS_FAILURE + "\nThe detected operating system is: " + operatingSystem);
+        }
+    }
+
+    private static void failWith(String failureMessage) {
+        System.out.println(failureMessage);
+        System.exit(-1);
     }
 
     /**

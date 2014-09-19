@@ -1,14 +1,9 @@
 package test.ddpsc.phenocv.computer_vision_test;
 
 import org.junit.Test;
-import org.opencv.core.CvType;
-import org.opencv.core.Mat;
-import org.opencv.highgui.Highgui;
 import src.ddpsc.phenocv.computer_vision.ColorImage;
 import src.ddpsc.phenocv.computer_vision.ColorPixel;
-import src.ddpsc.phenocv.computer_vision.ColorSpace;
 import src.ddpsc.phenocv.computer_vision.GrayImage;
-import src.ddpsc.phenocv.utility.Convert;
 import src.ddpsc.phenocv.utility.OpenCV;
 
 /**
@@ -17,7 +12,7 @@ import src.ddpsc.phenocv.utility.OpenCV;
 public class ColorPixelTest {
 
     static {
-        OpenCV.Load();
+        OpenCV.load();
     }
 
     @Test

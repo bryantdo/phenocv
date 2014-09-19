@@ -2,7 +2,6 @@ package test.ddpsc.phenocv.computer_vision_test;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import src.ddpsc.phenocv.computer_vision.ColorImage;
@@ -21,7 +20,7 @@ public class ColorImageTest {
 
     // Load openCV native library
     static {
-        OpenCV.Load();
+        OpenCV.load();
     }
 
     @Test

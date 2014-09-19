@@ -1,7 +1,6 @@
 package test.ddpsc.phenocv.computer_vision_test;
 
 import org.junit.Test;
-import org.opencv.core.Core;
 import src.ddpsc.phenocv.computer_vision.HistogramPartition;
 import src.ddpsc.phenocv.computer_vision.ColorSpace;
 import src.ddpsc.phenocv.computer_vision.ColorImage;
@@ -20,7 +19,7 @@ public class HistogramTest {
 
     // Load openCV native library
     static {
-        OpenCV.Load();
+        OpenCV.load();
     }
 
     private static final String NAME_PREFIX = "Histogram_Test_";

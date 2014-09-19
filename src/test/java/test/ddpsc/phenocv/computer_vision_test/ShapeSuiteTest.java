@@ -1,7 +1,6 @@
 package test.ddpsc.phenocv.computer_vision_test;
 
 import org.junit.Test;
-import org.opencv.core.Core;
 import src.ddpsc.phenocv.computer_vision.*;
 import src.ddpsc.phenocv.utility.OpenCV;
 
@@ -13,7 +12,7 @@ import java.util.List;
 public class ShapeSuiteTest {
 
     static {
-        OpenCV.Load();
+        OpenCV.load();
     }
 
     @Test
